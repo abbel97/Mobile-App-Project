@@ -1,6 +1,6 @@
 # Mobile-App-Project
 
-# Project Title: Personal Expense Tracker
+# Project Title: Home-Tweak
 
 ## Group Members
 | Name              | ID           |
