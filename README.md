@@ -1,6 +1,29 @@
 # Mobile-App-Project
 
-# Project Title: Home-Tweak
+# Project Title: Home-Tweak: Electrical Service Managemnent System
+## Home Tweak is a mobile application designed to assist users in requesting and managing electrical services for their homes. The app connects customers with electricians to handle tasks such as wiring issues, installations and electrical maintenance.
+
+## Features
+### 1. Service Request Management
+- Create a request
+- View existing requests
+- Update request details/status(pending, in progress, completed)
+- Delete/cancel requests
+
+### 2. Electrician Management (Job/Work orders)
+- Add profiles
+- View electrician details/assigned jobs
+- Update availability/status
+- Delete or manage jobs
+
+### 3. Authentication & Authorization
+- User registration and login
+- Role-based access (Customer, Electrician)
+       - Customers can only see their own requests
+       - Electricians can see assigned jobs
+- Secure access to features based on user roles
+
+
 
 ## Group Members
 | Name              | ID           |
