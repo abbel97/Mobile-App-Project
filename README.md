@@ -1,19 +1,19 @@
 # Mobile-App-Project
 
-# Project Title: Home-Tweak: Electrical Service Managemnent System
-### A mobile app  designed to assist users in requesting and managing electrical services for their homes. The system connects customers with electricians, allowing efficient handling of issues such as wiring problems, installations and any maintenance.
+# Project Title: Home-Tweak: Home Service Managemnent System
+### A mobile app  designed to assist users in requesting and managing technical services for their homes. The system connects customers with trusted professionals for various home maintenance and repair services allowing efficient handling of issues such as wiring problems, plumbing issues and any maintenance.
 ---
 
 ## Flow of the App
 
 ### General Workflow
 - Customer reports an issue
-- Electrician views and accepts the job
+- Professionals views and accepts the job
 - System manages the request lifecycle
 ---
 ### Customer Flow
 1. Register and Login
-2. Submit an electrical issue
+2. Submit an issue
    - Title (for e.g., "Power outage in kitchen")
    - Description
    - location 
@@ -21,8 +21,8 @@
 4. Delete/Cancel a request
 
 #### Request Handling Options (We may do both)
-- **Option A:** Customer selects and assigns a specific electrician
-- **Option B:** Customer submits a request, and electricians can view and accept it
+- **Option A:** Customer selects and assigns a specific Service Provider
+- **Option B:** Customer submits a request, and Professional can view and accept it
 ---
 ### Electrician Flow
 1. Register and Login
@@ -31,7 +31,6 @@
 4. View assigned jobs
 5. Update job status:
    - Pending
-   - In Progress
    - Completed
 
 ---
@@ -44,14 +43,14 @@
 - Update request status
 - Delete/cancel requests
 
-### 2. Electrician Management 
-- Create electrician profile
-- View electrician details
+### 2. Professionals Management 
+- Create Service provider profile
+- View service provider details
 - Update profile and availability
 - Delete profile
 
 ### 3. Job Handling System
-- Electricians can browse open requests
+- Professionals can browse open requests
 - Accept and manage assigned jobs
 - Track job progress using status updates
 
@@ -59,7 +58,7 @@
 - User registration and login
 - Role-based access control:
   - Customer
-  - Electrician
+  - Service Providers
 - Secure access to system features
 
 ---
