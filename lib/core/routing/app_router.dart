@@ -21,7 +21,7 @@ import '../../features/shared/presentation/screens/notification_screen.dart';
 import '../../features/shared/presentation/screens/professional_profile_detail_screen.dart';
 import '../../features/shared/presentation/screens/professionals_list_screen.dart';
 import '../../features/shared/presentation/screens/terms_and_policy_screen.dart';
-import '../../features/splash/presentation/screens/splash_screen.dart/splash_screen.dart';
+import '../../features/splash/presentation/screens/splash_screen.dart';
 import 'app_routes.dart';
 
 class AppRouter {
@@ -92,7 +92,10 @@ class AppRouter {
 			),
 			GoRoute(
 				path: AppRoutes.jobDetails,
-				builder: (context, state) => const JobDetailsScreen(),
+				builder: (context, state) {
+          final jobID = state.pathParameters['jobId']!;
+          return JobDetailsScreen(jobId: jobID);
+        },
 			),
 			GoRoute(
 				path: AppRoutes.professionalProfileEdit,

@@ -28,4 +28,10 @@ class AppRoutes {
 	static const professionalProfileDetail = '/professional-detail/:professionalId';
 	static const notifications = '/notifications';
 	static const termsAndPolicy = '/terms-policy';
+
+  static String jobDetailsPath(String jobId) =>
+      '/professional/jobs/$jobId';
+
+  static String professionalProfileDetailPath(String professionalId) =>
+      '/professionals/$professionalId';
 }

@@ -1,0 +1,154 @@
+import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+
+import '../../../../core/routing/app_routes.dart';
+import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_radii.dart';
+import '../../../../core/theme/app_text_styles.dart';
+import '../widgets/professional_bottom_nav_bar.dart';
+
+class ProfessionalDashboardScreen extends StatelessWidget {
+	const ProfessionalDashboardScreen({super.key});
+
+	@override
+	Widget build(BuildContext context) {
+		return Scaffold(
+			backgroundColor: AppColors.background,
+			body: SafeArea(
+				child: Column(
+					children: [
+						Expanded(
+							child: SingleChildScrollView(
+								padding: const EdgeInsets.fromLTRB(24, 8, 24, 24),
+								child: Column(
+									crossAxisAlignment: CrossAxisAlignment.start,
+									children: [
+										Row(
+											mainAxisAlignment: MainAxisAlignment.spaceBetween,
+											children: [
+												Container(width: 40, height: 40, decoration: BoxDecoration(color: AppColors.neutral, borderRadius: BorderRadius.circular(12)), child: const Icon(Icons.person_outline_rounded, color: AppColors.primary)),
+												Text('HOME-TWEAK', style: AppTextStyles.titleMedium.copyWith(fontSize: 24, color: AppColors.primary)),
+												Container(width: 40, height: 40, decoration: BoxDecoration(color: AppColors.neutral, borderRadius: BorderRadius.circular(12)), child: const Icon(Icons.person_outline_rounded, color: AppColors.primary)),
+											],
+										),
+										const SizedBox(height: 18),
+										Text('Hello, Elphaz.', style: AppTextStyles.headline2.copyWith(fontSize: 34, color: AppColors.primary)),
+										const SizedBox(height: 8),
+										Text("Ready for today's work?", style: AppTextStyles.bodyMedium.copyWith(fontSize: 17)),
+										const SizedBox(height: 28),
+										const _MetricCard(label: 'ACTIVE JOBS', value: '00', icon: Icons.people_alt_outlined, color: Color(0xFF29479A)),
+										const SizedBox(height: 14),
+										const _MetricCard(label: 'ACCEPTED JOBS', value: '10', icon: Icons.check_circle_outline_rounded, color: Color(0xFF0B7B53)),
+										const SizedBox(height: 34),
+										Row(children: [Text('Quick Actions', style: AppTextStyles.titleLarge.copyWith(fontSize: 24, color: AppColors.textPrimary)), const SizedBox(width: 16), const Expanded(child: Divider(color: AppColors.border))]),
+										const SizedBox(height: 16),
+										const _ActionCard(icon: Icons.manage_search_rounded, title: 'Available Jobs', description: 'Browse 24 new requests in your area'),
+										const SizedBox(height: 14),
+										const _ActionCard(icon: Icons.badge_outlined, title: 'My Jobs', description: 'Manage your active schedule and client list'),
+										const SizedBox(height: 34),
+										Text('Your Schedule', style: AppTextStyles.titleLarge.copyWith(fontSize: 24, color: AppColors.textPrimary)),
+										const SizedBox(height: 16),
+										const _ScheduleCard(accentColor: Color(0xFF0A6C5B), category: 'PLUMBING', status: 'CONFIRMED', title: 'Kitchen Sink Leak Repair', location: '1244 Bole St, Downtown'),
+										const SizedBox(height: 12),
+										const _ScheduleCard(accentColor: Color(0xFF29479A), category: 'ELECTRICAL', status: 'PRIORITY', title: 'Smart Thermostat Installation', location: '882 Mexico Roadway'),
+										const SizedBox(height: 12),
+										const _ScheduleCard(accentColor: Color(0xFFC9C9DA), category: 'GENERAL', status: 'PENDING', title: 'Furniture Assembly (Bookcase)', location: '22, Megenagna Street'),
+									],
+								),
+							),
+						),
+						ProfessionalBottomNavBar(
+							currentIndex: 0,
+							onTap: (index) {
+								switch (index) {
+									case 1:
+										context.go(AppRoutes.jobs);
+										break;
+									case 2:
+										context.go(AppRoutes.professionalsList);
+										break;
+									case 3:
+										context.go(AppRoutes.professionalSettings);
+										break;
+								}
+							},
+						),
+					],
+				),
+			),
+		);
+	}
+}
+
+class _MetricCard extends StatelessWidget {
+	const _MetricCard({required this.label, required this.value, required this.icon, required this.color});
+
+	final String label;
+	final String value;
+	final IconData icon;
+	final Color color;
+
+	@override
+	Widget build(BuildContext context) {
+		return Container(
+			width: double.infinity,
+			height: 144,
+			padding: const EdgeInsets.all(18),
+			decoration: BoxDecoration(color: color, borderRadius: BorderRadius.circular(14)),
+			child: Column(
+				crossAxisAlignment: CrossAxisAlignment.start,
+				mainAxisAlignment: MainAxisAlignment.spaceBetween,
+				children: [
+					Icon(icon, color: AppColors.neutral.withValues(alpha: 0.85), size: 28),
+					Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [Text(label, style: AppTextStyles.labelMedium.copyWith(color: AppColors.neutral.withValues(alpha: 0.6), fontSize: 11)), Text(value, style: AppTextStyles.titleLarge.copyWith(color: AppColors.surface, fontSize: 30))]),
+				],
+			),
+		);
+	}
+}
+
+class _ActionCard extends StatelessWidget {
+	const _ActionCard({required this.icon, required this.title, required this.description});
+
+	final IconData icon;
+	final String title;
+	final String description;
+
+	@override
+	Widget build(BuildContext context) {
+		return Container(
+			width: double.infinity,
+			padding: const EdgeInsets.all(20),
+			decoration: BoxDecoration(color: AppColors.card, borderRadius: BorderRadius.circular(AppRadii.md)),
+			child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Icon(icon, color: AppColors.primary, size: 24), const SizedBox(height: 16), Text(title, style: AppTextStyles.titleSmall.copyWith(fontSize: 18, color: AppColors.primary)), const SizedBox(height: 6), Text(description, style: AppTextStyles.bodySmall.copyWith(color: AppColors.textBody))]),
+		);
+	}
+}
+
+class _ScheduleCard extends StatelessWidget {
+	const _ScheduleCard({required this.accentColor, required this.category, required this.status, required this.title, required this.location});
+
+	final Color accentColor;
+	final String category;
+	final String status;
+	final String title;
+	final String location;
+
+	@override
+	Widget build(BuildContext context) {
+		return Container(
+			width: double.infinity,
+			padding: const EdgeInsets.all(16),
+			decoration: BoxDecoration(color: AppColors.surface, borderRadius: BorderRadius.circular(AppRadii.md), border: Border(left: BorderSide(color: accentColor, width: 4))),
+			child: Row(
+				children: [
+					Expanded(
+						child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Row(children: [Text(category, style: AppTextStyles.labelMedium.copyWith(letterSpacing: 2.0, fontSize: 10, color: AppColors.textBody)), const SizedBox(width: 8), Container(width: 4, height: 4, decoration: const BoxDecoration(color: AppColors.textMuted, shape: BoxShape.circle)), const SizedBox(width: 8), Text(status, style: AppTextStyles.labelMedium.copyWith(fontSize: 10, color: accentColor))]), const SizedBox(height: 10), Text(title, style: AppTextStyles.titleSmall.copyWith(fontSize: 18, color: AppColors.textPrimary)), const SizedBox(height: 6), Row(children: [const Icon(Icons.place_outlined, size: 14, color: AppColors.tertiary), const SizedBox(width: 4), Expanded(child: Text(location, style: AppTextStyles.bodySmall.copyWith(fontSize: 13)))])]),
+					),
+					const SizedBox(width: 12),
+					const Icon(Icons.chevron_right_rounded, color: AppColors.textMuted),
+				],
+			),
+		);
+	}
+}
