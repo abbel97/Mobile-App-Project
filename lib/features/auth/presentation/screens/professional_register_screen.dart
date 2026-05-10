@@ -58,7 +58,7 @@ class _ProfessionalRegisterScreenState extends State<ProfessionalRegisterScreen>
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
-          'Professional Registration',
+          'Register',
           style: AppTextStyles.titleMedium,
         ),
         centerTitle: true,
@@ -90,7 +90,7 @@ class _ProfessionalRegisterScreenState extends State<ProfessionalRegisterScreen>
             const SizedBox(height: 16),
             CustomTextField(
               label: 'Email Address',
-              hintText: 'user@GMAIL.com',
+              hintText: 'youremail@email.com',
               controller: _emailController,
               keyboardType: TextInputType.emailAddress,
             ),
