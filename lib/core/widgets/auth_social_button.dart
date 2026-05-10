@@ -18,7 +18,8 @@ class AuthSocialButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
+    return Expanded(
+      child: InkWell(
         borderRadius: BorderRadius.circular(AppRadii.sm),
         onTap: onTap,
         child: Container(
@@ -37,6 +38,7 @@ class AuthSocialButton extends StatelessWidget {
             ],
           ),
         ),
+      ),
     );
   }
 }

@@ -5,14 +5,14 @@ class AppTextStyles {
   const AppTextStyles._();
 
   static TextStyle get headline1 => GoogleFonts.manrope(
-    fontSize: 48,
+    fontSize: 42,
     height: 1.08,
     fontWeight: FontWeight.w800,
     letterSpacing: -1.2,
   );
 
   static TextStyle get headline2 => GoogleFonts.manrope(
-    fontSize: 44,
+    fontSize: 36,
     height: 1.1,
     fontWeight: FontWeight.w700,
     letterSpacing: -1.0,

@@ -28,6 +28,7 @@ class RoleSelectionCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.card,
         borderRadius: BorderRadius.circular(AppRadii.md),
+        border: Border.all(color: AppColors.border),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -43,16 +44,31 @@ class RoleSelectionCard extends StatelessWidget {
             child: Icon(icon, color: AppColors.primary, size: 28),
           ),
           const SizedBox(height: 28),
-          Text(title, style: AppTextStyles.titleLarge..copyWith(color: AppColors.textPrimary)),
+          Text(
+            title,
+            style: AppTextStyles.titleLarge.copyWith(
+              color: AppColors.textPrimary,
+            ),
+          ),
           const SizedBox(height: 16),
-          Text(description, style: AppTextStyles.bodyMedium.copyWith(color: AppColors.textBody)),
+          Text(
+            description,
+            style: AppTextStyles.bodyMedium.copyWith(
+              color: AppColors.textBody,
+            ),
+          ),
           const SizedBox(height: 24),
           InkWell(
             onTap: onTap,
             borderRadius: BorderRadius.circular(AppRadii.sm),
             child: Padding(
               padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 2),
-              child: Text('$cta →', style: AppTextStyles.titleSmall.copyWith(color: AppColors.success)),
+              child: Text(
+                '$cta ->',
+                style: AppTextStyles.titleSmall.copyWith(
+                  color: AppColors.success,
+                ),
+              ),
             ),
           ),
         ],

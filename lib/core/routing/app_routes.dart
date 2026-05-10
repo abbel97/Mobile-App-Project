@@ -20,7 +20,7 @@ class AppRoutes {
 	static const professionalDashboard = '/professional/dashboard';
 	static const jobs = '/professional/jobs';
 	static const acceptedJobs = '/professional/accepted-jobs';
-	static const jobDetails = '/professional/job-details/:jobId';
+	static const jobDetails = '/professional/job-details';
 	static const professionalProfileEdit = '/professional/profile-edit';
 	static const professionalSettings = '/professional/settings';
 
@@ -28,4 +28,10 @@ class AppRoutes {
 	static const professionalProfileDetail = '/professional-detail/:professionalId';
 	static const notifications = '/notifications';
 	static const termsAndPolicy = '/terms-policy';
+
+  static String jobDetailsPath(String jobId) =>
+      '/professional/jobs/$jobId';
+
+  static String professionalProfileDetailPath(String professionalId) =>
+      '/professionals/$professionalId';
 }

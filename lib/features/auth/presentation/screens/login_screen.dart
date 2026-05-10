@@ -71,7 +71,7 @@ class LoginScreen extends StatelessWidget {
 										PrimaryButton(
 											label: 'LOG IN',
 											trailing: const Icon(Icons.arrow_forward, size: 20),
-											onPressed: () => context.go(AppRoutes.customerDashboard),
+											onPressed: () => context.go(AppRoutes.professionalDashboard),
 										),
 										const SizedBox(height: 52),
 										const Divider(color: AppColors.border),

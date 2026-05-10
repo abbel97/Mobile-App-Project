@@ -31,7 +31,7 @@ class TopBar extends StatelessWidget implements PreferredSizeWidget {
 							icon: const Icon(Icons.arrow_back, color: AppColors.primary),
 						)
 					: null,
-			titleSpacing: showBack ? 0 : 24,
+			titleSpacing: showBack ? 0 : 12,
 			title: Text(
 				title,
 				style: AppTextStyles.titleMedium,

@@ -24,7 +24,7 @@ class CustomerRegisterScreen extends StatelessWidget {
 							Center(
 								child: Column(
 									children: [
-										Text('HOME-TWEAK', style: AppTextStyles.titleMedium.copyWith(fontSize: 40)),
+										Text('HOME-TWEAK', style: AppTextStyles.titleMedium.copyWith(fontSize: 32)),
 										const SizedBox(height: 8),
 										Container(width: 84, height: 5, color: AppColors.success),
 									],
@@ -34,7 +34,7 @@ class CustomerRegisterScreen extends StatelessWidget {
 							Text('Welcome!', style: AppTextStyles.headline2),
 							const SizedBox(height: 12),
 							Text(
-								'Create your account to start managing your\nhome transformations.',
+								'Create your account to start managing your home transformations.',
 								style: AppTextStyles.bodyMedium,
 							),
 							const SizedBox(height: 36),
@@ -66,7 +66,7 @@ class CustomerRegisterScreen extends StatelessWidget {
 							),
 							const SizedBox(height: 18),
 							Row(
-								children: const [
+								children: const [ 
 									AuthSocialButton(label: 'GOOGLE', icon: Icons.g_mobiledata),
 									SizedBox(width: 12),
 									AuthSocialButton(label: 'APPLE', icon: Icons.apple),
