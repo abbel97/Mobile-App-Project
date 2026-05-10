@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import '../theme/app_colors.dart';
-import '../theme/app_radii.dart';
 import '../theme/app_text_styles.dart';
 
 class CustomTextField extends StatelessWidget {
@@ -32,7 +31,12 @@ class CustomTextField extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         if (label != null) ...[
-          Text(label!, style: AppTextStyles.labelLarge),
+          Text(
+            label!,
+            style: AppTextStyles.labelLarge.copyWith(
+              color: AppColors.textPrimary,
+            ),
+          ),
           const SizedBox(height: 10),
         ],
         TextField(
@@ -40,20 +44,13 @@ class CustomTextField extends StatelessWidget {
           obscureText: obscureText,
           keyboardType: keyboardType,
           maxLines: maxLines,
-          style: AppTextStyles.bodyRegular,
+          style: AppTextStyles.bodyRegular.copyWith(
+            color: AppColors.textPrimary,
+          ),
           decoration: InputDecoration(
             hintText: hintText,
             suffixIcon: suffixIcon,
             prefixIcon: prefix,
-            fillColor: AppColors.inputFill,
-            contentPadding: const EdgeInsets.symmetric(
-              horizontal: 16,
-              vertical: 16,
-            ),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(AppRadii.sm),
-              borderSide: const BorderSide(color: AppColors.border),
-            ),
           ),
         ),
       ],

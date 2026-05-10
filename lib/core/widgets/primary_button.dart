@@ -12,7 +12,7 @@ class PrimaryButton extends StatelessWidget {
     this.trailing,
     this.backgroundColor = AppColors.primary,
     this.textColor = AppColors.surface,
-    this.height = 68,
+    this.height = 52,
   });
 
   final String label;
@@ -42,7 +42,7 @@ class PrimaryButton extends StatelessWidget {
           children: [
             Text(
               label,
-              style: AppTextStyles.titleSmall.copyWith(color: textColor),
+              style: AppTextStyles.button.copyWith(color: textColor),
             ),
             if (trailing != null) ...[
               const SizedBox(width: 8),
