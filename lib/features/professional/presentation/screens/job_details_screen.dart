@@ -7,7 +7,8 @@ import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/widgets/primary_button.dart';
 
 class JobDetailsScreen extends StatelessWidget {
-	const JobDetailsScreen({super.key});
+  final String jobId;
+	const JobDetailsScreen({super.key, required this.jobId});
 
 	@override
 	Widget build(BuildContext context) {
