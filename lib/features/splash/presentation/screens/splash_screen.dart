@@ -59,7 +59,7 @@ class _SplashScreenState extends State<SplashScreen> {
 							Text(
 								'Home service management',
 								style: AppTextStyles.bodyMedium.copyWith(
-									color: AppColors.neutral.withOpacity(0.8),
+									color: AppColors.neutral.withValues(alpha: .8),
 								),
 							),
 

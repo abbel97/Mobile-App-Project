@@ -84,8 +84,10 @@ class JobDetailsScreen extends StatelessWidget {
 		);
 	}
 }
+
 class _Tag extends StatelessWidget {
 	const _Tag({required this.label});
+
 	final String label;
 
 	@override
