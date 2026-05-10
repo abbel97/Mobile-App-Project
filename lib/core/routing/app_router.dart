@@ -92,10 +92,7 @@ class AppRouter {
 			),
 			GoRoute(
 				path: AppRoutes.jobDetails,
-				builder: (context, state) {
-          final jobId = state.pathParameters['jobId']!;
-          return JobDetailsScreen(jobId: jobId);
-        },
+				builder: (context, state) => const JobDetailsScreen(),
 			),
 			GoRoute(
 				path: AppRoutes.professionalProfileEdit,

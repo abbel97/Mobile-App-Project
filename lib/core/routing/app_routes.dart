@@ -20,7 +20,7 @@ class AppRoutes {
 	static const professionalDashboard = '/professional/dashboard';
 	static const jobs = '/professional/jobs';
 	static const acceptedJobs = '/professional/accepted-jobs';
-	static const jobDetails = '/professional/job-details/:jobId';
+	static const jobDetails = '/professional/job-details';
 	static const professionalProfileEdit = '/professional/profile-edit';
 	static const professionalSettings = '/professional/settings';
 
