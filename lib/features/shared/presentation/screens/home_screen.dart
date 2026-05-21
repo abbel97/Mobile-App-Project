@@ -17,55 +17,62 @@ class HomeScreen extends StatelessWidget {
       backgroundColor: AppColors.background,
       body: SafeArea(
         child: SingleChildScrollView(
-          child: Padding(
-            padding: AppSpacing.screenPadding.copyWith(top: 54, bottom: 42),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('Welcome to\nHome-Tweak', style: AppTextStyles.headline2),
-                const SizedBox(height: 18),
-                Text(
-                  'Choose your path to professional home\nmanagement. Precise, structured, and\nreliable.',
-                  style: AppTextStyles.bodyMedium,
+          padding: AppSpacing.screenPadding.copyWith(top: 54, bottom: 42),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Welcome to\nHome-Tweak',
+                style: AppTextStyles.headline2.copyWith(
+                  color: AppColors.primary,
                 ),
-                const SizedBox(height: 52),
-                RoleSelectionCard(
-                  icon: Icons.house_outlined,
-                  title: 'I need a fix',
-                  description:
-                      'Find certified experts for your home repairs, maintenance, and\nemergency tweaks..',
-                  cta: 'GET STARTED',
-                  onTap: () => context.go(AppRoutes.customerRegister),
+              ),
+              const SizedBox(height: 18),
+              Text(
+                'Choose your path to professional home\nmanagement. Precise, structured and reliable.',
+                style: AppTextStyles.bodyMedium.copyWith(
+                  color: AppColors.textBody,
                 ),
-                const SizedBox(height: 30),
-                RoleSelectionCard(
-                  icon: Icons.manage_accounts_outlined,
-                  title: "I'm a professional",
-                  description:
-                      'Access professional requests,\nmanage your schedule, and power\nup your career on our marketplace',
-                  cta: 'REGISTER AND START WORKING',
-                  onTap: () => context.go(AppRoutes.professionalRegister),
-                ),
-                const SizedBox(height: 110),
-                Center(
-                  child: Text(
-                    'Already have an account?',
-                    style: AppTextStyles.bodyMedium.copyWith(fontSize: 22),
+              ),
+              const SizedBox(height: 52),
+              RoleSelectionCard(
+                icon: Icons.house_outlined,
+                title: 'I need a fix',
+                description:
+                    'Find certified experts for your home repairs, maintenance, and emergency tweaks.',
+                cta: 'GET STARTED',
+                onTap: () => context.go(AppRoutes.customerRegister),
+              ),
+              const SizedBox(height: 30),
+              RoleSelectionCard(
+                icon: Icons.manage_accounts_outlined,
+                title: "I'm a professional",
+                description:
+                    'Access professional requests, manage your schedule, and power up your career on our marketplace.',
+                cta: 'REGISTER AND START WORKING',
+                onTap: () => context.go(AppRoutes.professionalRegister),
+              ),
+              const SizedBox(height: 110),
+              Center(
+                child: Text(
+                  'Already have an account?',
+                  style: AppTextStyles.bodyMedium.copyWith(
+                    color: AppColors.textBody,
                   ),
                 ),
-                const SizedBox(height: 16),
-                Center(
-                  child: SizedBox(
-                    width: 230,
-                    child: PrimaryButton(
-                      label: 'Sign In',
-                      height: 56,
-                      onPressed: () => context.go(AppRoutes.login),
-                    ),
+              ),
+              const SizedBox(height: 16),
+              Center(
+                child: SizedBox(
+                  width: 140,
+                  child: PrimaryButton(
+                    label: 'Sign In',
+                    height: 50,
+                    onPressed: () => context.go(AppRoutes.login),
                   ),
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),

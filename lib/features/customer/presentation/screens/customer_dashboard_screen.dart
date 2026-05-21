@@ -25,7 +25,9 @@ class CustomerDashboardScreen extends StatelessWidget {
 									children: [
 										const _Header(),
 										const SizedBox(height: 28),
-										Text('Hello, xyz', style: AppTextStyles.headline2),
+										Text('Hello, xyz', style: AppTextStyles.headline2.copyWith(
+                      fontSize: 28,
+                      color: AppColors.primary,)),
 										const SizedBox(height: 10),
 										Text(
 											'Your Home is in Good hands. Need\nsomething fixed today?',
@@ -35,8 +37,12 @@ class CustomerDashboardScreen extends StatelessWidget {
 										const SizedBox(height: 28),
 										const _EmergencyCard(),
 										const SizedBox(height: 28),
-										Text('Recent Requests', style: AppTextStyles.titleLarge.copyWith(fontSize: 24)),
-										const SizedBox(height: 16),
+										Text(
+                      'Recent Requests', 
+                       style: AppTextStyles.titleMedium.copyWith(
+                        fontSize: 20,
+                        color: AppColors.primary)),
+										const SizedBox(height: 12),
 										const _RequestPreviewCard(
 											accentColor: AppColors.success,
 											icon: Icons.handyman_rounded,
@@ -44,7 +50,7 @@ class CustomerDashboardScreen extends StatelessWidget {
 											subtitle: 'Technician In Route',
 										),
 
-										const SizedBox(height: 16),
+										const SizedBox(height: 12),
 										const _RequestPreviewCard(
 											accentColor: Color(0xFFC9C9DA),
 											icon: Icons.lightbulb_rounded,
@@ -53,7 +59,9 @@ class CustomerDashboardScreen extends StatelessWidget {
 										),
                     
 										const SizedBox(height: 28),
-										Text('Explore Services', style: AppTextStyles.titleLarge.copyWith(fontSize: 24)),
+										Text('Explore Services', style: AppTextStyles.titleMedium.copyWith(
+                      color: AppColors.primary,
+                      fontSize: 20)),
 										const SizedBox(height: 16),
 										const _ServicePanel(
 											icon: Icons.warning_amber_rounded,

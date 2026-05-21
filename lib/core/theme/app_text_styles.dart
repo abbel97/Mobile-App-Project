@@ -12,14 +12,14 @@ class AppTextStyles {
   );
 
   static TextStyle get headline2 => GoogleFonts.manrope(
-    fontSize: 36,
+    fontSize: 34,
     height: 1.1,
     fontWeight: FontWeight.w700,
     letterSpacing: -1.0,
   );
 
   static TextStyle get titleLarge => GoogleFonts.manrope(
-    fontSize: 28,
+    fontSize: 24,
     height: 1.2,
     fontWeight: FontWeight.w700,
   );
@@ -43,7 +43,7 @@ class AppTextStyles {
   );
 
   static TextStyle get bodyMedium => GoogleFonts.inter(
-    fontSize: 16,
+    fontSize: 14,
     height: 1.5,
     fontWeight: FontWeight.w500,
   );
@@ -61,14 +61,14 @@ class AppTextStyles {
   );
 
   static TextStyle get labelLarge => GoogleFonts.inter(
-    fontSize: 14,
+    fontSize: 12,
     height: 1.15,
     fontWeight: FontWeight.w700,
     letterSpacing: 1.2,
   );
 
   static TextStyle get labelMedium => GoogleFonts.inter(
-    fontSize: 13,
+    fontSize: 11,
     height: 1.15,
     fontWeight: FontWeight.w700,
     letterSpacing: 2.4,
