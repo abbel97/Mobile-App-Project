@@ -6,6 +6,7 @@ import '../../features/auth/presentation/screens/forgot_password_scren.dart';
 import '../../features/auth/presentation/screens/login_screen.dart';
 import '../../features/auth/presentation/screens/professional_register_screen.dart';
 import '../../features/customer/presentation/screens/customer_dashboard_screen.dart';
+import '../../features/customer/presentation/screens/request_submission_screen.dart';
 import '../../features/customer/presentation/screens/customer_edit_profile_sreen.dart';
 import '../../features/customer/presentation/screens/customer_settings_screen.dart';
 import '../../features/customer/presentation/screens/edit_request_screen.dart';
@@ -62,13 +63,17 @@ class AppRouter {
 				path: AppRoutes.customerDashboard,
 				builder: (context, state) => const CustomerDashboardScreen(),
 			),
+      GoRoute(
+        path: AppRoutes.customerRequestSubmit,
+        builder: (context, state) => const RequestSubmissionScreen(),
+      ),
 			GoRoute(
 				path: AppRoutes.customerRequests,
 				builder: (context, state) => const RecentRequestsScreen(),
 			),
 			GoRoute(
 				path: AppRoutes.customerRequestEdit,
-				builder: (context, state) => const EditRequestScreen(),
+				builder: (context, state) => const EditRequestScreen(requestId: '',),
 			),
 			GoRoute(
 				path: AppRoutes.customerProfileEdit,
