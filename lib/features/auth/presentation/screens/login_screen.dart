@@ -17,7 +17,10 @@ class LoginScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: const TopBar(title: 'HOME-TWEAK'),
+      appBar: TopBar(
+        title: 'Home Tweak',
+        onBack: () => context.pop(),
+      ),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: AppSpacing.screenPadding.copyWith(top: 22, bottom: 28),
@@ -49,7 +52,7 @@ class LoginScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: 34),
                     const CustomTextField(
-                      label: 'EMAIL ADDRESS',
+                      label: 'Email Adress',
                       hintText: 'youremail@gmail.com',
                       keyboardType: TextInputType.emailAddress,
                     ),
@@ -58,15 +61,15 @@ class LoginScreen extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          'PASSWORD',
+                          'Password',
                           style: AppTextStyles.labelLarge.copyWith(
                             color: AppColors.textPrimary,
                           ),
                         ),
                         GestureDetector(
-                          onTap: () => context.go(AppRoutes.forgotPassword),
+                          onTap: () => context.push(AppRoutes.forgotPassword),
                           child: Text(
-                            'FORGOT PASSWORD?',
+                            'Forgot Password?',
                             style: AppTextStyles.labelMedium.copyWith(
                               color: AppColors.success,
                               fontSize: 10,

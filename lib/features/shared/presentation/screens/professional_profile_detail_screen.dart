@@ -19,14 +19,12 @@ class ProfessionalProfileDetailScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
-      bottomNavigationBar: bottomNavigationBar,
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.fromLTRB(24, 8, 24, 24),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // ── Inline header ────────────────────────────
               Row(
                 children: [
                   IconButton(
@@ -37,8 +35,9 @@ class ProfessionalProfileDetailScreen extends StatelessWidget {
                     ),
                   ),
                   Text(
-                    'HOME-TWEAK',
+                    'Back',
                     style: AppTextStyles.titleMedium.copyWith(
+                      fontSize: 20,
                       color: AppColors.primary,
                     ),
                   ),
@@ -46,7 +45,6 @@ class ProfessionalProfileDetailScreen extends StatelessWidget {
               ),
               const SizedBox(height: 18),
 
-              // ── Profile card ─────────────────────────────
               Container(
                 width: double.infinity,
                 padding: const EdgeInsets.only(bottom: 24),
@@ -64,7 +62,7 @@ class ProfessionalProfileDetailScreen extends StatelessWidget {
                 child: Column(
                   children: [
                     Container(
-                      height: 68,
+                      height: 60,
                       decoration: const BoxDecoration(
                         color: Color(0xFF40589B),
                         borderRadius: BorderRadius.vertical(
@@ -76,7 +74,7 @@ class ProfessionalProfileDetailScreen extends StatelessWidget {
                       offset: const Offset(0, -36),
                       child: const _ProfileAvatar(),
                     ),
-                    const SizedBox(height: 6),
+                    const SizedBox(height: 2),
                     Text(
                       'Elphaz Jovani',
                       style: AppTextStyles.titleLarge.copyWith(
@@ -118,13 +116,12 @@ class ProfessionalProfileDetailScreen extends StatelessWidget {
               ),
               const SizedBox(height: 18),
 
-              // ── Stats — stacked vertically ───────────────
               const _InfoStat(title: '12+', subtitle: 'YEARS EXPERIENCE'),
               const SizedBox(height: 12),
-              const _InfoStat(title: '14', subtitle: 'JOBS DONE'),
+              const _InfoStat(title: '10', subtitle: 'JOBS DONE'),
               const SizedBox(height: 24),
 
-              // ── Biography ────────────────────────────────
+              
               Text(
                 'BIOGRAPHY',
                 style: AppTextStyles.labelMedium.copyWith(

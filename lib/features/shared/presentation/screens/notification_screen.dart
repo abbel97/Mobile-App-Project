@@ -34,7 +34,6 @@ class _NotificationScreenState extends State<NotificationScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // ── Communication Preferences Banner ────────
               Container(
                 width: double.infinity,
                 padding: const EdgeInsets.all(24),
@@ -76,8 +75,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
               ),
               const SizedBox(height: 28),
 
-              // ── Job Updates ─────────────────────────────
-              _SectionHeader(title: 'Job Updates'),
+              _SectionHeader(title: 'Job Updates'),  //add fontsize for the title
               const SizedBox(height: 14),
               _ToggleGroup(
                 items: [

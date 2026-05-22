@@ -25,6 +25,7 @@ class CustomerRegisterScreen extends StatelessWidget {
               Center(
                 child: Column(
                   children: [
+                    
                     Text(
                       'HOME-TWEAK',
                       style: AppTextStyles.titleMedium.copyWith(
@@ -67,11 +68,17 @@ class CustomerRegisterScreen extends StatelessWidget {
                 hintText: '••••••••',
                 obscureText: true,
               ),
+              const SizedBox(height: 22),
+              const CustomTextField(
+                label: 'Confirm Password',
+                hintText: '••••••••',
+                obscureText: true,
+              ),
               const SizedBox(height: 30),
               PrimaryButton(
                 label: 'Sign Up',
                 trailing: const Icon(Icons.arrow_forward, size: 18, color: Colors.white),
-                onPressed: () => context.go(AppRoutes.customerDashboard),
+                onPressed: () => context.push(AppRoutes.customerDashboard),
               ),
               const SizedBox(height: 48),
               Row(
@@ -123,7 +130,7 @@ class CustomerRegisterScreen extends StatelessWidget {
                           fontWeight: FontWeight.w700,
                         ),
                         recognizer: TapGestureRecognizer()
-                          ..onTap = () => context.go(AppRoutes.login),
+                          ..onTap = () => context.push(AppRoutes.login),
                       ),
                     ],
                   ),

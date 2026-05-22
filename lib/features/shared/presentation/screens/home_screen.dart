@@ -41,7 +41,7 @@ class HomeScreen extends StatelessWidget {
                 description:
                     'Find certified experts for your home repairs, maintenance, and emergency tweaks.',
                 cta: 'GET STARTED',
-                onTap: () => context.go(AppRoutes.customerRegister),
+                onTap: () => context.push(AppRoutes.customerRegister),
               ),
               const SizedBox(height: 30),
               RoleSelectionCard(
@@ -50,7 +50,7 @@ class HomeScreen extends StatelessWidget {
                 description:
                     'Access professional requests, manage your schedule, and power up your career on our marketplace.',
                 cta: 'REGISTER AND START WORKING',
-                onTap: () => context.go(AppRoutes.professionalRegister),
+                onTap: () => context.push(AppRoutes.professionalRegister),
               ),
               const SizedBox(height: 110),
               Center(
@@ -68,7 +68,7 @@ class HomeScreen extends StatelessWidget {
                   child: PrimaryButton(
                     label: 'Sign In',
                     height: 50,
-                    onPressed: () => context.go(AppRoutes.login),
+                    onPressed: () => context.push(AppRoutes.login),
                   ),
                 ),
               ),

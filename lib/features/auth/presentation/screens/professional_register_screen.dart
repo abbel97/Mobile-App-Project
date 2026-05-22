@@ -32,6 +32,7 @@ class _ProfessionalRegisterScreenState
   bool _agreedToTerms = false;
 
   final List<String> _professions = [
+    'General Handyman',
     'Electrician',
     'Plumber',
     'Carpenter',
@@ -49,8 +50,8 @@ class _ProfessionalRegisterScreenState
     'General Contractor',
     'Interior Designer',
     'Architect',
-    'Structural Engineer',
-    'General Handyman', 
+    'Structural Engineer', 
+    'Other Home Pro',
   ];
 
   final List<String> _educationLevels = [
@@ -61,6 +62,7 @@ class _ProfessionalRegisterScreenState
     'Bachelor\'s Degree',
     'Master\'s Degree',
     'No Formal Education',
+    'Other',
   ];
 
   @override
@@ -97,7 +99,10 @@ class _ProfessionalRegisterScreenState
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: const TopBar(title: 'HOME-TWEAK'),
+      appBar: TopBar(
+        title: 'Home-tweak',
+        onBack: () => context.pop(),
+      ),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: AppSpacing.screenPadding.copyWith(top: 28, bottom: 32),
@@ -331,7 +336,7 @@ class _ProfessionalRegisterScreenState
                               fontWeight: FontWeight.w600,
                             ),
                             recognizer: TapGestureRecognizer()
-                              ..onTap = () => context.go(AppRoutes.termsAndPolicy),
+                              ..onTap = () => context.push(AppRoutes.termsAndPolicy),
                           ),
                         ],
                       ),
@@ -361,7 +366,7 @@ class _ProfessionalRegisterScreenState
                           fontWeight: FontWeight.w700,
                         ),
                         recognizer: TapGestureRecognizer()
-                          ..onTap = () => context.go(AppRoutes.login),
+                          ..onTap = () => context.push(AppRoutes.login),
                       ),
                     ],
                   ),

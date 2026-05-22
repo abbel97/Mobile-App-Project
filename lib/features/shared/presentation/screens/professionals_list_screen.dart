@@ -27,24 +27,19 @@ class ProfessionalsListScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // ── Inline header ────────────────────────────
+             
               Row(
                 children: [
                   Container(
-                    width: 44,
-                    height: 44,
+                    width: 20,
+                    height: 40,
                     decoration: BoxDecoration(
                       color: AppColors.neutral,
                       borderRadius: BorderRadius.circular(AppRadii.md),
                     ),
-                    child: const Icon(
-                      Icons.person_outline_rounded,
-                      color: AppColors.primary,
-                    ),
                   ),
-                  const SizedBox(width: 14),
                   Text(
-                    'HOME-TWEAK',
+                    'Home-Tweak',
                     style: AppTextStyles.titleMedium.copyWith(
                       color: AppColors.primary,
                     ),
@@ -53,37 +48,24 @@ class ProfessionalsListScreen extends StatelessWidget {
               ),
               const SizedBox(height: 24),
 
-              // ── Search bar ───────────────────────────────
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 14,
-                ),
-                decoration: BoxDecoration(
-                  color: AppColors.surface,
+             TextField(
+              decoration: InputDecoration(
+                hintText: 'Search individuals...',
+                prefixIcon: const Icon(Icons.search_rounded),
+
+                filled: true,
+                fillColor: AppColors.surface,
+
+                border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(AppRadii.md),
-                  border: Border.all(color: AppColors.border),
-                ),
-                child: Row(
-                  children: [
-                    const Icon(
-                      Icons.search_rounded,
-                      color: AppColors.tertiary,
-                      size: 24,
-                    ),
-                    const SizedBox(width: 12),
-                    Text(
-                      'Search...',
-                      style: AppTextStyles.bodyRegular.copyWith(
-                        color: AppColors.textMuted,
-                      ),
-                    ),
-                  ],
+                  borderSide: const BorderSide(
+                    color: AppColors.border,
+                  ),
                 ),
               ),
-              const SizedBox(height: 22),
+            ),
+              const SizedBox(height: 20),
 
-              // ── Filter pills ─────────────────────────────
               SingleChildScrollView(
                 scrollDirection: Axis.horizontal,
                 child: Row(
@@ -99,36 +81,34 @@ class ProfessionalsListScreen extends StatelessWidget {
                     _Pill(label: 'Painting'),
                     SizedBox(width: 12),
                     _Pill(label: 'Contractors'),
+                    SizedBox(width: 12),
+                    _Pill(label: 'Interior Designer'),
                   ],
                 ),
               ),
               const SizedBox(height: 26),
 
-              // ── Professional cards ───────────────────────
               _ProfessionalCard(
                 name: 'Elphaz Jovani',
                 title: 'Carpenter',
                 experience: '12 years experience',
-                rating: '4.9',
-                onTap: () => context.go(
+                onTap: () => context.push(
                   AppRoutes.professionalProfileDetailPath('elphaz-jovani'),
                 ),
               ),
               _ProfessionalCard(
                 name: 'Michael Ash',
-                title: 'Interior Lighting Designer',
+                title: 'Interior Designer',
                 experience: '8 years experience',
-                rating: '5.0',
-                onTap: () => context.go(
+                onTap: () => context.push(
                   AppRoutes.professionalProfileDetailPath('michael-ash'),
                 ),
               ),
               _ProfessionalCard(
                 name: 'David James',
-                title: 'Expert Plumber',
+                title: 'Plumber',
                 experience: '15 years experience',
-                rating: '4.8',
-                onTap: () => context.go(
+                onTap: () => context.push(
                   AppRoutes.professionalProfileDetailPath('david-james'),
                 ),
               ),
@@ -136,9 +116,8 @@ class ProfessionalsListScreen extends StatelessWidget {
                 name: 'Abebe Kebedee',
                 title: 'Custom Cabinetry & Carpentry',
                 experience: '6 years experience',
-                rating: '4.7',
                 hasPhoto: false,
-                onTap: () => context.go(
+                onTap: () => context.push(
                   AppRoutes.professionalProfileDetailPath('abebe-kebedee'),
                 ),
               ),
@@ -183,7 +162,6 @@ class _ProfessionalCard extends StatelessWidget {
     required this.name,
     required this.title,
     required this.experience,
-    required this.rating,
     required this.onTap,
     this.hasPhoto = true,
   });
@@ -191,7 +169,6 @@ class _ProfessionalCard extends StatelessWidget {
   final String name;
   final String title;
   final String experience;
-  final String rating;
   final VoidCallback onTap;
   final bool hasPhoto;
 
@@ -202,7 +179,7 @@ class _ProfessionalCard extends StatelessWidget {
       borderRadius: BorderRadius.circular(AppRadii.md),
       child: Container(
         margin: const EdgeInsets.only(bottom: 12),
-        padding: const EdgeInsets.all(18),
+        padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           color: AppColors.card,
           borderRadius: BorderRadius.circular(AppRadii.md),
@@ -210,17 +187,17 @@ class _ProfessionalCard extends StatelessWidget {
         child: Row(
           children: [
             Container(
-              width: 84,
-              height: 84,
+              width: 70,
+              height: 70,
               decoration: BoxDecoration(
                 color: hasPhoto
-                    ? const Color(0xFF1F2937)
+                    ? const Color.fromARGB(255, 28, 37, 48)
                     : AppColors.surface,
                 borderRadius: BorderRadius.circular(AppRadii.md),
                 border: Border.all(color: AppColors.border),
               ),
               child: hasPhoto
-                  ? const Icon(Icons.person, color: AppColors.surface, size: 42)
+                  ? const Icon(Icons.person, color: AppColors.surface, size: 38)
                   : const SizedBox.shrink(),
             ),
             const SizedBox(width: 18),
@@ -254,19 +231,7 @@ class _ProfessionalCard extends StatelessWidget {
                   const SizedBox(height: 8),
                   Row(
                     children: [
-                      const Icon(
-                        Icons.star_rounded,
-                        size: 16,
-                        color: Color(0xFFF59E0B),
-                      ),
                       const SizedBox(width: 4),
-                      Text(
-                        rating,
-                        style: AppTextStyles.titleSmall.copyWith(
-                          fontSize: 14,
-                          color: AppColors.textPrimary,
-                        ),
-                      ),
                     ],
                   ),
                 ],
@@ -325,7 +290,8 @@ class _SupportPromo extends StatelessWidget {
                 ),
                 elevation: 0,
               ),
-              child: Text(
+              child:
+               Text(
                 'Submit your issue',
                 style: AppTextStyles.titleSmall.copyWith(
                   color: AppColors.primary,

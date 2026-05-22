@@ -18,7 +18,6 @@ class TermsAndPolicyScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // ── Inline back header ───────────────────────
               Row(
                 children: [
                   IconButton(
@@ -29,7 +28,7 @@ class TermsAndPolicyScreen extends StatelessWidget {
                     ),
                   ),
                   Text(
-                    'Back',
+                    'Terms & Policy',
                     style: AppTextStyles.titleSmall.copyWith(
                       color: AppColors.primary,
                     ),
@@ -38,7 +37,6 @@ class TermsAndPolicyScreen extends StatelessWidget {
               ),
               const SizedBox(height: 18),
 
-              // ── Legal Framework badge ────────────────────
               Container(
                 padding: const EdgeInsets.symmetric(
                   horizontal: 10,
@@ -101,7 +99,6 @@ class TermsAndPolicyScreen extends StatelessWidget {
               ),
               const SizedBox(height: 28),
 
-              // ── Policy Sections ──────────────────────────
               const _PolicySection(
                 number: '01',
                 title: 'User Agreement',
@@ -161,7 +158,6 @@ class TermsAndPolicyScreen extends StatelessWidget {
               ),
               const SizedBox(height: 30),
 
-              // ── CTA Card ─────────────────────────────────
               Container(
                 width: double.infinity,
                 padding: const EdgeInsets.all(24),
