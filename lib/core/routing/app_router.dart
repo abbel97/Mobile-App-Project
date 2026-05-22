@@ -120,7 +120,7 @@ class AppRouter {
          const ProfessionalsListScreen(
         showCta: false,
       ),
-),
+    ),
 			GoRoute(
 				path: AppRoutes.professionalProfileDetail,
 				builder: (context, state) {
