@@ -29,6 +29,12 @@ class AppRoutes {
 	static const notifications = '/notifications';
 	static const termsAndPolicy = '/terms-policy';
 
+  static const customerProfessionalsList =
+    '/customer/professionals';
+
+static const professionalProfessionalsList =
+    '/professional/professionals';
+
   static String jobDetailsPath(String jobId) =>
       '/professional/jobs/$jobId';
 

@@ -114,6 +114,13 @@ class AppRouter {
 				path: AppRoutes.professionalsList,
 				builder: (context, state) => const ProfessionalsListScreen(),
 			),
+      GoRoute(
+        path: AppRoutes.professionalProfessionalsList,
+        builder: (context, state) =>
+         const ProfessionalsListScreen(
+        showCta: false,
+      ),
+),
 			GoRoute(
 				path: AppRoutes.professionalProfileDetail,
 				builder: (context, state) {
