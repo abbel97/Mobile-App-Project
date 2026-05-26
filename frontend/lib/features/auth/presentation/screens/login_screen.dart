@@ -1,5 +1,6 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/routing/app_routes.dart';
@@ -10,12 +11,56 @@ import '../../../../core/widgets/auth_social_button.dart';
 import '../../../../core/widgets/custom_textfield.dart';
 import '../../../../core/widgets/primary_button.dart';
 import '../../../../core/widgets/top_bar.dart';
+import '../providers/auth_notifier.dart';
 
-class LoginScreen extends StatelessWidget {
+class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
 
   @override
+  ConsumerState<LoginScreen> createState() => _LoginScreenState();
+}
+
+class _LoginScreenState extends ConsumerState<LoginScreen> {
+  final _emailController = TextEditingController();
+  final _passController  = TextEditingController();
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passController.dispose();
+    super.dispose();
+  }
+
+  void _login() {
+    final email    = _emailController.text.trim();
+    final password = _passController.text;
+    if (email.isEmpty || password.isEmpty) {
+      _showSnackBar('Please fill in all fields');
+      return;
+    }
+    ref.read(authProvider.notifier).login(email: email, password: password);
+  }
+
+  void _showSnackBar(String message, {bool isError = true}) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: isError ? AppColors.danger : AppColors.success,
+      ),
+    );
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final auth = ref.watch(authProvider);
+
+    ref.listen<AuthState>(authProvider, (_, next) {
+      if (next.error != null) {
+        _showSnackBar(next.error!);
+        ref.read(authProvider.notifier).clearError();
+      }
+    });
+
     return Scaffold(
       appBar: TopBar(
         title: 'Home Tweak',
@@ -51,9 +96,10 @@ class LoginScreen extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 34),
-                    const CustomTextField(
+                    CustomTextField(
                       label: 'Email Adress',
                       hintText: 'youremail@gmail.com',
+                      controller: _emailController,
                       keyboardType: TextInputType.emailAddress,
                     ),
                     const SizedBox(height: 24),
@@ -79,15 +125,21 @@ class LoginScreen extends StatelessWidget {
                       ],
                     ),
                     const SizedBox(height: 10),
-                    const CustomTextField(
+                    CustomTextField(
                       hintText: '••••••••',
                       obscureText: true,
                     ),
                     const SizedBox(height: 30),
                     PrimaryButton(
                       label: 'LOG IN',
-                      trailing: const Icon(Icons.arrow_forward, size: 20, color: Colors.white),
-                      onPressed: () => context.go(AppRoutes.professionalDashboard),
+                     trailing: auth.isLoading
+                          ? const SizedBox(
+                              width: 18, height: 18,
+                              child: CircularProgressIndicator(
+                                  color: Colors.white, strokeWidth: 2))
+                          : const Icon(Icons.arrow_forward,
+                              size: 20, color: Colors.white),
+                      onPressed: auth.isLoading ? null : _login,
                     ),
                     const SizedBox(height: 52),
                     const Divider(color: AppColors.border),
@@ -155,8 +207,7 @@ class LoginScreen extends StatelessWidget {
               Text(
                 '© 2026 HOME-TWEAK PROJECT MGMT.',
                 style: AppTextStyles.labelMedium.copyWith(
-                  fontSize: 9,
-                  color: AppColors.tertiary,
+                  fontSize: 9, color: AppColors.tertiary,
                 ),
               ),
             ],

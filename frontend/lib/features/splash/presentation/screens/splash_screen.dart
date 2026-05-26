@@ -1,77 +1,43 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../../../core/theme/app_colors.dart';
-import '../../../../../core/theme/app_text_styles.dart';
+import '../../../../core/routing/app_routes.dart';
+import '../../../../core/theme/app_colors.dart';
+import '../../../../core/widgets/app_logo.dart';
+import '../../../auth/presentation/providers/auth_notifier.dart';
 
-class SplashScreen extends StatefulWidget {
-	const SplashScreen({super.key});
-	@override
-	State<SplashScreen> createState() => _SplashScreenState();
-}
+class SplashScreen extends ConsumerWidget {
+  const SplashScreen({super.key});
 
-class _SplashScreenState extends State<SplashScreen> {
-	@override
-	void initState() {
-		super.initState();
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    ref.listen<AuthState>(authProvider, (_, next) {
+      if (!next.isInitialized) return;
+      if (next.isAuthenticated) {
+        context.go(next.isCustomer
+            ? AppRoutes.customerDashboard
+            : AppRoutes.professionalDashboard);
+      } else {
+        context.go(AppRoutes.home);
+      }
+    });
 
-		Future.delayed(
-			const Duration(seconds: 5),() {
-				if (mounted) {
-					context.go('/home');
-				}
-			},
-		);
-	}
-
-	@override
-	Widget build(BuildContext context) {
-		return Scaffold(
-			backgroundColor: AppColors.primary,
-			body: SafeArea(
-				child: Center(
-					child: Column(
-						mainAxisSize: MainAxisSize.min,
-						children: [
-							Container(
-								width: 112,
-								height: 112,
-								decoration: BoxDecoration(
-									color: AppColors.surface,
-									borderRadius: BorderRadius.circular(24),
-								),
-								child: const Icon(
-									Icons.architecture_rounded,
-									color: AppColors.primary,
-									size: 62,
-								),
-							),
-
-							const SizedBox(height: 28),
-							Text('HOME-TWEAK',
-								style: AppTextStyles.headline2.copyWith(
-									color: AppColors.surface,
-								),
-							),
-
-							const SizedBox(height: 10),
-
-							Text(
-								'Home service management',
-								style: AppTextStyles.bodyMedium.copyWith(
-									color: AppColors.neutral.withValues(alpha: .8),
-								),
-							),
-
-							const SizedBox(height: 40),
-							const CircularProgressIndicator(
-								color: AppColors.surface,
-								strokeWidth: 3,
-							),
-						],
-					),
-				),
-			),
-		);
-	}
+    return Scaffold(
+      backgroundColor: AppColors.primary,
+      body: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            AppLogo(showWordmark: true),
+            const SizedBox(height: 48),
+            const CircularProgressIndicator(
+              color: Colors.white,
+              strokeWidth: 2,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 }

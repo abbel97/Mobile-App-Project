@@ -1,5 +1,6 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/routing/app_routes.dart';
@@ -9,12 +10,65 @@ import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/widgets/auth_social_button.dart';
 import '../../../../core/widgets/custom_textfield.dart';
 import '../../../../core/widgets/primary_button.dart';
+import '../providers/auth_notifier.dart';
 
-class CustomerRegisterScreen extends StatelessWidget {
+class CustomerRegisterScreen extends ConsumerStatefulWidget {
   const CustomerRegisterScreen({super.key});
 
   @override
+  ConsumerState<CustomerRegisterScreen> createState() =>
+      _CustomerRegisterScreenState();
+}
+
+class _CustomerRegisterScreenState
+    extends ConsumerState<CustomerRegisterScreen> {
+  final _nameController  = TextEditingController();
+  final _emailController = TextEditingController();
+  final _passController  = TextEditingController();
+  final _confirmPassController = TextEditingController();
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _emailController.dispose();
+    _passController.dispose();
+    _confirmPassController.dispose();
+    super.dispose();
+  }
+
+  void _register() {
+    final name     = _nameController.text.trim();
+    final email    = _emailController.text.trim();
+    final password = _passController.text;
+    if (name.isEmpty || email.isEmpty || password.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please fill in all fields')));
+      return;
+    }
+    if (password != _confirmPassController.text) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Passwords do not match')));
+      return;
+    }
+    ref.read(authProvider.notifier).registerCustomer(
+      name: name, email: email, password: password,
+    );
+  }
+
+  @override
   Widget build(BuildContext context) {
+     final auth = ref.watch(authProvider);
+
+    ref.listen<AuthState>(authProvider, (_, next) {
+      if (next.error != null) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text(next.error!),
+          backgroundColor: AppColors.danger,
+        ));
+        ref.read(authProvider.notifier).clearError();
+      }
+    });
+
     return Scaffold(
       body: SafeArea(
         child: SingleChildScrollView(
@@ -55,30 +109,43 @@ class CustomerRegisterScreen extends StatelessWidget {
                 style: AppTextStyles.bodyMedium.copyWith(color: AppColors.textBody),
               ),
               const SizedBox(height: 36),
-              const CustomTextField(label: 'Full Name', hintText: 'Your Name'),
+              CustomTextField(
+                label: 'Full Name',
+                 hintText: 'Your Name',
+                 controller: _nameController,
+                 ),
               const SizedBox(height: 24),
-              const CustomTextField(
+              CustomTextField(
                 label: 'Email Address',
                 hintText: 'youremail@gmail.com',
                 keyboardType: TextInputType.emailAddress,
+                controller: _emailController,
               ),
               const SizedBox(height: 24),
-              const CustomTextField(
+              CustomTextField(
                 label: 'Password',
                 hintText: '••••••••',
                 obscureText: true,
+                controller: _passController,
               ),
               const SizedBox(height: 22),
-              const CustomTextField(
+              CustomTextField(
                 label: 'Confirm Password',
                 hintText: '••••••••',
                 obscureText: true,
+                controller: _confirmPassController,
               ),
               const SizedBox(height: 30),
               PrimaryButton(
                 label: 'Sign Up',
-                trailing: const Icon(Icons.arrow_forward, size: 18, color: Colors.white),
-                onPressed: () => context.push(AppRoutes.customerDashboard),
+              trailing: auth.isLoading
+                    ? const SizedBox(
+                        width: 18, height: 18,
+                        child: CircularProgressIndicator(
+                            color: Colors.white, strokeWidth: 2))
+                    : const Icon(Icons.arrow_forward,
+                        size: 18, color: Colors.white),
+                onPressed: auth.isLoading ? null : _register,
               ),
               const SizedBox(height: 48),
               Row(

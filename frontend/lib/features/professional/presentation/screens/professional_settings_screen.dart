@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../auth/presentation/providers/auth_notifier.dart';
 
 import '../../../../core/routing/app_routes.dart';
 import '../../../../core/theme/app_colors.dart';
@@ -9,16 +11,16 @@ import '../../../../features/shared/presentation/widgets/delete_account_dialog.d
 import '../../../../features/shared/presentation/widgets/logout_dialog.dart';
 import '../widgets/professional_bottom_nav_bar.dart';
 
-class ProfessionalSettingsScreen extends StatefulWidget {
+class ProfessionalSettingsScreen extends ConsumerStatefulWidget {
   const ProfessionalSettingsScreen({super.key});
 
   @override
-  State<ProfessionalSettingsScreen> createState() =>
+  ConsumerState<ProfessionalSettingsScreen> createState() =>
       _ProfessionalSettingsScreenState();
 }
 
 class _ProfessionalSettingsScreenState
-    extends State<ProfessionalSettingsScreen> {
+    extends ConsumerState<ProfessionalSettingsScreen> {
   bool _darkMode = false;
 
   @override
@@ -47,7 +49,6 @@ class _ProfessionalSettingsScreenState
                     ),
                     const SizedBox(height: 24),
 
-                  
                     Center(
                       child: Column(
                         children: [
@@ -94,7 +95,7 @@ class _ProfessionalSettingsScreenState
                     ),
                     const SizedBox(height: 28),
 
-                    // ── Preferences ────────────────────────
+                    //Preferences
                     _sectionLabel('PREFERENCES'),
                     const SizedBox(height: 12),
                     _SettingsCard(
@@ -118,7 +119,7 @@ class _ProfessionalSettingsScreenState
                     ),
                     const SizedBox(height: 24),
 
-                    // ── Account ────────────────────────────
+                    // Account
                     _sectionLabel('ACCOUNT'),
                     const SizedBox(height: 12),
                     _SettingsCard(
@@ -133,7 +134,7 @@ class _ProfessionalSettingsScreenState
                     ),
                     const SizedBox(height: 24),
 
-                    // ── Legal ──────────────────────────────
+                    // Legal
                     _sectionLabel('LEGAL'),
                     const SizedBox(height: 12),
                     _SettingsCard(
@@ -157,7 +158,7 @@ class _ProfessionalSettingsScreenState
                     ),
                     const SizedBox(height: 28),
 
-                    // ── Logout ─────────────────────────────
+                    // Logout
                     SizedBox(
                       width: double.infinity,
                       height: 52,
@@ -165,9 +166,7 @@ class _ProfessionalSettingsScreenState
                         onPressed: () => showDialog(
                           context: context,
                           builder: (_) => LogoutDialog(
-                            onLogout: () {
-                              // TODO: handle logout
-                            },
+                            onLogout: () => ref.read(authProvider.notifier).logout(),
                           ),
                         ),
                         style: OutlinedButton.styleFrom(
@@ -190,7 +189,7 @@ class _ProfessionalSettingsScreenState
                     ),
                     const SizedBox(height: 14),
 
-                    // ── Delete Account ─────────────────────
+                    // Delete Account
                     SizedBox(
                       width: double.infinity,
                       height: 52,
@@ -198,9 +197,7 @@ class _ProfessionalSettingsScreenState
                         onPressed: () => showDialog(
                           context: context,
                           builder: (_) => DeleteAccountDialog(
-                            onDelete: () {
-                              // TODO: handle account deletion
-                            },
+                           onDelete: () => ref.read(authProvider.notifier).deleteAccount(),
                           ),
                         ),
                         style: OutlinedButton.styleFrom(

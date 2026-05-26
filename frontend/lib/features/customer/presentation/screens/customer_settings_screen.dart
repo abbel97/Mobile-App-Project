@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../auth/presentation/providers/auth_notifier.dart';
 
 import '../../../../core/routing/app_routes.dart';
 import '../../../../core/theme/app_colors.dart';
@@ -9,14 +11,14 @@ import '../../../../features/shared/presentation/widgets/delete_account_dialog.d
 import '../../../../features/shared/presentation/widgets/logout_dialog.dart';
 import '../widgets/customer_bottom_nav_bar.dart';
 
-class CustomerSettingsScreen extends StatefulWidget {
+class CustomerSettingsScreen extends ConsumerStatefulWidget {
   const CustomerSettingsScreen({super.key});
 
   @override
-  State<CustomerSettingsScreen> createState() => _CustomerSettingsScreenState();
+  ConsumerState<CustomerSettingsScreen> createState() => _CustomerSettingsScreenState();
 }
 
-class _CustomerSettingsScreenState extends State<CustomerSettingsScreen> {
+class _CustomerSettingsScreenState extends ConsumerState<CustomerSettingsScreen> {
   bool _darkMode = false;
 
   @override
@@ -162,9 +164,7 @@ class _CustomerSettingsScreenState extends State<CustomerSettingsScreen> {
                         onPressed: () => showDialog(
                           context: context,
                           builder: (_) => LogoutDialog(
-                            onLogout: () {
-                              // TODO: handle logout
-                            },
+                            onLogout: () => ref.read(authProvider.notifier).logout(),
                           ),
                         ),
                         style: OutlinedButton.styleFrom(
@@ -194,9 +194,7 @@ class _CustomerSettingsScreenState extends State<CustomerSettingsScreen> {
                         onPressed: () => showDialog(
                           context: context,
                           builder: (_) => DeleteAccountDialog(
-                            onDelete: () {
-                              // TODO: handle account deletion
-                            },
+                           onDelete: () => ref.read(authProvider.notifier).deleteAccount(),
                           ),
                         ),
                         style: OutlinedButton.styleFrom(

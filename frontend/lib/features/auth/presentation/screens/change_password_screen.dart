@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/theme/app_colors.dart';
@@ -7,15 +8,16 @@ import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/widgets/custom_textfield.dart';
 import '../../../../core/widgets/primary_button.dart';
 import '../../../../core/widgets/top_bar.dart';
+import '../providers/auth_notifier.dart';
 
-class ChangePasswordScreen extends StatefulWidget {
+class ChangePasswordScreen extends ConsumerStatefulWidget {
   const ChangePasswordScreen({super.key});
 
   @override
-  State<ChangePasswordScreen> createState() => _ChangePasswordScreenState();
+  ConsumerState<ChangePasswordScreen> createState() => _ChangePasswordScreenState();
 }
 
-class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
+class _ChangePasswordScreenState extends ConsumerState<ChangePasswordScreen> {
   final _currentPasswordController = TextEditingController();
   final _newPasswordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
@@ -30,6 +32,24 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final auth = ref.watch(authProvider);
+
+    ref.listen<AuthState>(authProvider, (prev, next) {
+      if (next.error != null) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text(next.error!), backgroundColor: AppColors.danger));
+        ref.read(authProvider.notifier).clearError();
+      }
+      // Show success if loading went false with no error
+      if ((prev?.isLoading ?? false) && !next.isLoading && next.error == null) {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text('Password changed successfully'),
+          backgroundColor: AppColors.success,
+        ));
+        context.pop();
+      }
+    });
+
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: TopBar(
@@ -94,12 +114,21 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
               ),
               const SizedBox(height: 24),
               PrimaryButton(
-                label: 'Update Password',
-                height: 52,
-                onPressed: () {
-                  // TODO: handle password update
-                },
-              ),
+              label: 'Update Password',
+              height: 52,
+              trailing: auth.isLoading
+                  ? const SizedBox(
+                      width: 18, height: 18,
+                      child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                  : null,
+              onPressed: auth.isLoading ? null : () {
+                ref.read(authProvider.notifier).changePassword(
+                  currentPassword: _currentPasswordController.text,
+                  newPassword:     _newPasswordController.text,
+                );
+              },
+            ),
+
               const SizedBox(height: 12),
               SizedBox(
                 width: double.infinity,

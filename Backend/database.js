@@ -1,26 +1,37 @@
 const initSqlJs = require('sql.js');
-const fs = require('fs');
-const path = require('path');
+const fs        = require('fs');
+const path      = require('path');
 
 const DB_PATH = path.join(__dirname, 'home_tweak.db');
 let db;
 
 async function initDatabase() {
   const SQL = await initSqlJs();
-
-  if (fs.existsSync(DB_PATH)) {
-    const buffer = fs.readFileSync(DB_PATH);
-    db = new SQL.Database(buffer);
-  } else {
-    db = new SQL.Database();
-  }
-
+  db = fs.existsSync(DB_PATH)
+    ? new SQL.Database(fs.readFileSync(DB_PATH))
+    : new SQL.Database();
   createTables();
   console.log('✅ Database ready');
 }
 
 function save() {
   fs.writeFileSync(DB_PATH, Buffer.from(db.export()));
+}
+
+// SELECT — returns array of plain objects
+function query(sql, params = []) {
+  const stmt = db.prepare(sql);
+  stmt.bind(params);
+  const rows = [];
+  while (stmt.step()) rows.push(stmt.getAsObject());
+  stmt.free();
+  return rows;
+}
+
+// INSERT / UPDATE / DELETE — auto-saves to file
+function run(sql, params = []) {
+  db.run(sql, params);
+  save();
 }
 
 function createTables() {
@@ -34,7 +45,6 @@ function createTables() {
       created_at TEXT NOT NULL
     )
   `);
-
   db.run(`
     CREATE TABLE IF NOT EXISTS service_requests (
       id          TEXT PRIMARY KEY,
@@ -51,7 +61,6 @@ function createTables() {
       FOREIGN KEY (customer_id) REFERENCES users(id)
     )
   `);
-
   db.run(`
     CREATE TABLE IF NOT EXISTS professionals (
       id               TEXT PRIMARY KEY,
@@ -69,10 +78,7 @@ function createTables() {
       FOREIGN KEY (user_id) REFERENCES users(id)
     )
   `);
-
   save();
 }
 
-function getDb() { return db; }
-
-module.exports = { initDatabase, getDb, save };
+module.exports = { initDatabase, query, run };

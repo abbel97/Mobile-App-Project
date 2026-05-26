@@ -1,5 +1,6 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/routing/app_routes.dart';
@@ -10,17 +11,18 @@ import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/widgets/custom_textfield.dart';
 import '../../../../core/widgets/primary_button.dart';
 import '../../../../core/widgets/top_bar.dart';
+import '../providers/auth_notifier.dart';
 
-class ProfessionalRegisterScreen extends StatefulWidget {
+class ProfessionalRegisterScreen extends ConsumerStatefulWidget {
   const ProfessionalRegisterScreen({super.key});
 
   @override
-  State<ProfessionalRegisterScreen> createState() =>
+  ConsumerState<ProfessionalRegisterScreen> createState() =>
       _ProfessionalRegisterScreenState();
 }
 
 class _ProfessionalRegisterScreenState
-    extends State<ProfessionalRegisterScreen> {
+    extends ConsumerState<ProfessionalRegisterScreen> {
   final _nameController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
@@ -50,8 +52,8 @@ class _ProfessionalRegisterScreenState
     'General Contractor',
     'Interior Designer',
     'Architect',
-    'Structural Engineer', 
-    'Other Home Pro',
+    'Structural Engineer',  
+    'Other Home Pro', 
   ];
 
   final List<String> _educationLevels = [
@@ -97,6 +99,18 @@ class _ProfessionalRegisterScreenState
 
   @override
   Widget build(BuildContext context) {
+    final auth = ref.watch(authProvider);
+
+    ref.listen<AuthState>(authProvider, (_, next) {
+      if (next.error != null) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text(next.error!),
+          backgroundColor: AppColors.danger,
+        ));
+        ref.read(authProvider.notifier).clearError();
+      }
+    });
+
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: TopBar(
@@ -347,11 +361,24 @@ class _ProfessionalRegisterScreenState
               const SizedBox(height: 28),
 
               PrimaryButton(
-                label: 'Complete Registration',
-                onPressed: () {
-                  // TODO: handle registration logic
-                },
-              ),
+              label: 'Complete Registration',
+              trailing: auth.isLoading
+                  ? const SizedBox(
+                      width: 18, height: 18,
+                      child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                  : null,
+              onPressed: auth.isLoading ? null : () {
+                ref.read(authProvider.notifier).registerProfessional(
+                  name:            _nameController.text.trim(),
+                  email:           _emailController.text.trim(),
+                  password:        _passwordController.text,
+                  profession:      _selectedProfession ?? '',
+                  bio:             _bioController.text,
+                  educationLevel:  _selectedEducation,
+                  experienceYears: int.tryParse(_experienceController.text),
+                );
+              },
+            ),
               const SizedBox(height: 20),
               Center(
                 child: RichText(
