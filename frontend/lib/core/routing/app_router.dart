@@ -65,7 +65,7 @@ final routerProvider = Provider<GoRouter>((ref) {
         return AppRoutes.professionalDashboard;
       }
 
-      // Already logged in — redirect away from auth screens
+      // Already logged in, No auth screens
       if (isAuth &&
           (location == AppRoutes.home ||
            location == AppRoutes.login ||
