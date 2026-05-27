@@ -11,7 +11,13 @@ class AppDatabase {
 
   static Future<Database> _init() async {
     final path = join(await getDatabasesPath(), 'home_tweak.db');
-    return openDatabase(path, version: 1, onCreate: _createTables);
+    return openDatabase(path, version: 2, onCreate: _createTables, onUpgrade: (db, oldV, newV) async {
+      if (oldV < 2) {
+        await db.execute('''
+          ALTER TABLE service_requests ADD COLUMN accepted_by TEXT
+        ''');
+      }
+    });
   }
 
   static Future<void> _createTables(Database db, int version) async {
@@ -36,6 +42,7 @@ class AppDatabase {
         status      TEXT NOT NULL,
         urgency     TEXT NOT NULL,
         customer_id TEXT NOT NULL,
+        accepted_by TEXT,
         created_at  TEXT NOT NULL,
         updated_at  TEXT NOT NULL
       )
