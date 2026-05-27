@@ -18,20 +18,18 @@
    - Description
    - location 
 3. View submitted requests
-4. Delete/Cancel a request
+4. Delete/Edit a request
 
 #### Request Handling Options (We may do both)
 - **Option A:** Customer selects and assigns a specific Service Provider
 - **Option B:** Customer submits a request, and Professional can view and accept it
 ---
-### Electrician Flow
+### Professional Flow
 1. Register and Login
 2. View available job requests
 3. Accept a job request
-4. View assigned jobs
-5. Update job status:
-   - Pending
-   - Completed
+4. View accepted jobs
+5. Edit Profile
 
 ---
 
@@ -41,12 +39,12 @@
 - Create a service request
 - View all requests
 - Update request status
-- Delete/cancel requests
+- Delete/Edit requests
 
 ### 2. Professionals Management 
 - Create Service provider profile
 - View service provider details
-- Update profile and availability
+- Update profile 
 - Delete profile
 
 ### 3. Job Handling System
