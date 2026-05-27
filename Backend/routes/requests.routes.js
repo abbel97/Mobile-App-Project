@@ -8,10 +8,10 @@ const {
 
 router.use(authenticate);
 
-router.get('/',  getRequests);
-router.get('/:id',  getRequest);
-router.post('/', authorize('customer'), createRequest);
-router.put('/:id', authorize('customer'), updateRequest);
+router.get('/',       getRequests);
+router.get('/:id',   getRequest);
+router.post('/',      authorize('customer'), createRequest);
+router.put('/:id',    authorize('customer'), updateRequest);
 router.delete('/:id', authorize('customer'), deleteRequest);
 router.put('/:id/accept',  authorize('professional'), acceptRequest);
 
