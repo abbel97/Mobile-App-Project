@@ -22,8 +22,8 @@ class _RequestSubmissionScreenState extends ConsumerState<RequestSubmissionScree
   final _issueTitleController = TextEditingController();
   final _descriptionController = TextEditingController();
   final _locationController = TextEditingController();
-  String _profession = 'Electrician';
-  String _urgency = 'URGENT';
+  String _profession = 'General Handyman';
+  String _urgency = 'REGULAR';
 
   final List<String> _professions = [
     'General Handyman',
@@ -306,7 +306,7 @@ class _RequestSubmissionScreenState extends ConsumerState<RequestSubmissionScree
                       final loc   = _locationController.text.trim();
                       if (title.isEmpty || desc.isEmpty || loc.isEmpty) {
                         ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Please fill in all required fields')));
+                          const SnackBar(content: Text('Please fill in all required fields'), backgroundColor: Colors.red)); 
                         return;
                       }
                       ref.read(serviceRequestProvider.notifier).createRequest(

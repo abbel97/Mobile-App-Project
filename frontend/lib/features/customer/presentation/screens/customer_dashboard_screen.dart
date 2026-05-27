@@ -1,17 +1,24 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/routing/app_routes.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_radii.dart';
 import '../../../../core/theme/app_text_styles.dart';
+import '../../../auth/presentation/providers/auth_notifier.dart';
+import '../providers/service_request_notifier.dart';
 import '../widgets/customer_bottom_nav_bar.dart';
 
-class CustomerDashboardScreen extends StatelessWidget {
+class CustomerDashboardScreen extends ConsumerWidget {
   const CustomerDashboardScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final auth = ref.watch(authProvider);
+    final recentRequests = ref.watch(serviceRequestProvider).requests.take(2).toList();
+    final firstName = _firstName(auth.user?.name);
+
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
@@ -26,7 +33,7 @@ class CustomerDashboardScreen extends StatelessWidget {
                     const _Header(),
                     const SizedBox(height: 28),
                     Text(
-                      'Hello, xyz',
+                      'Hello, $firstName',
                       style: AppTextStyles.titleLarge.copyWith(
                         fontSize: 28,
                         color: AppColors.primary,
@@ -41,33 +48,31 @@ class CustomerDashboardScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: 28),
                     _EmergencyCard(
-                      onPressed: () =>
-                          context.push(AppRoutes.customerRequestSubmit),
+                      onPressed: () => context.push(AppRoutes.customerRequestSubmit),
                     ),
-                    const SizedBox(height: 28),
-                    Text(
-                      'Recent Requests',
-                      style: AppTextStyles.titleMedium.copyWith(
-                        fontSize: 20,
-                        color: AppColors.primary,
+                    if (recentRequests.isNotEmpty) ...[
+                      const SizedBox(height: 28),
+                      Text(
+                        'Recent Requests',
+                        style: AppTextStyles.titleMedium.copyWith(
+                          fontSize: 20,
+                          color: AppColors.primary,
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 12),
-                    _RequestPreviewCard(
-                      accentColor: AppColors.success,
-                      icon: Icons.handyman_rounded,
-                      title: 'Kitchen Sink Leakage',
-                      subtitle: 'Technician En Route',
-                      onTap: () => context.push(AppRoutes.customerRequests),
-                    ),
-                    const SizedBox(height: 12),
-                    _RequestPreviewCard(
-                      accentColor: const Color(0xFFC9C9DA),
-                      icon: Icons.lightbulb_rounded,
-                      title: 'Smart Light Installation',
-                      subtitle: 'Scheduled for June 24',
-                      onTap: () => context.go(AppRoutes.customerRequests),
-                    ),
+                      const SizedBox(height: 12),
+                      for (var i = 0; i < recentRequests.length; i++) ...[
+                        _RequestPreviewCard(
+                          accentColor: recentRequests[i].isPending
+                              ? AppColors.success
+                              : AppColors.tertiary,
+                          icon: Icons.handyman_rounded,
+                          title: recentRequests[i].title,
+                          subtitle: recentRequests[i].status.toUpperCase(),
+                          onTap: () => context.push(AppRoutes.customerRequests),
+                        ),
+                        if (i < recentRequests.length - 1) const SizedBox(height: 12),
+                      ],
+                    ],
                     const SizedBox(height: 28),
                     Text(
                       'Explore Services',
@@ -114,7 +119,7 @@ class CustomerDashboardScreen extends StatelessWidget {
                     context.push(AppRoutes.customerRequests);
                     break;
                   case 2:
-                    context.push(AppRoutes.professionalsList);
+                    context.push(AppRoutes.customerProfessionalsList);
                     break;
                   case 3:
                     context.push(AppRoutes.customerSettings);
@@ -127,6 +132,12 @@ class CustomerDashboardScreen extends StatelessWidget {
       ),
     );
   }
+}
+
+String _firstName(String? name) {
+  final value = name?.trim() ?? '';
+  if (value.isEmpty) return 'there';
+  return value.split(RegExp(r'\s+')).first;
 }
 
 class _Header extends StatelessWidget {

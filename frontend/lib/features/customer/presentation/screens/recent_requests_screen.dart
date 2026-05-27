@@ -75,7 +75,7 @@ class RecentRequestsScreen extends ConsumerWidget {
               onTap: (index) {
                 switch (index) {
                   case 0: context.go(AppRoutes.customerDashboard); break;
-                  case 2: context.go(AppRoutes.professionalsList);  break;
+                  case 2: context.go(AppRoutes.customerProfessionalsList);  break;
                   case 3: context.go(AppRoutes.customerSettings);   break;
                 }
               },

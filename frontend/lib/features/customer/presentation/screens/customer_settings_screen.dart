@@ -122,7 +122,7 @@ class _CustomerSettingsScreenState extends ConsumerState<CustomerSettingsScreen>
                           title: 'Dark Mode',
                           subtitle: 'Switch to a darker theme',
                           value: _darkMode,
-                          // TODO: implement dark mode theme switching
+                          // TODO: implement dark mode toggle
                           onChanged: (val) =>
                               setState(() => _darkMode = val),
                         ),
@@ -226,14 +226,11 @@ class _CustomerSettingsScreenState extends ConsumerState<CustomerSettingsScreen>
               currentIndex: 3,
               onTap: (index) {
                 switch (index) {
-                  case 0:
-                    context.push(AppRoutes.customerDashboard);
+                  case 0: context.push(AppRoutes.customerDashboard);
                     break;
-                  case 1:
-                    context.push(AppRoutes.customerRequests);
+                  case 1: context.push(AppRoutes.customerRequests);
                     break;
-                  case 2:
-                    context.push(AppRoutes.professionalsList);
+                  case 2: context.push(AppRoutes.customerProfessionalsList);
                     break;
                 }
               },
