@@ -42,6 +42,8 @@ final routerProvider = Provider<GoRouter>((ref) {
     redirect: (context, state) {
       final auth = ref.read(authProvider);
       final location = state.uri.toString();
+      const customerPrefix = '/customer/';
+      const professionalPrefix = '/professional/';
 
       // Still loading persisted user — let splash handle it
       if (location == AppRoutes.splash) return null;
@@ -52,16 +54,18 @@ final routerProvider = Provider<GoRouter>((ref) {
 
       // Unauthenticated trying to reach protected routes
       if (!isAuth &&
-          (location.startsWith('/customer') ||
-           location.startsWith('/professional'))) {
+          (location.startsWith(customerPrefix) ||
+           location.startsWith(professionalPrefix) ||
+           location.startsWith('/professionals'))) {
         return AppRoutes.home;
       }
 
       // Role-based authorization
-      if (isAuth && isCust && location.startsWith('/professional')) {
+      if (isAuth && isCust &&
+          (location.startsWith(professionalPrefix) || location.startsWith('/professionals'))) {
         return AppRoutes.customerDashboard;
       }
-      if (isAuth && isProf && location.startsWith('/customer')) {
+      if (isAuth && isProf && location.startsWith(customerPrefix)) {
         return AppRoutes.professionalDashboard;
       }
 

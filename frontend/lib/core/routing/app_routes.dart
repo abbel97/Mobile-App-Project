@@ -25,7 +25,7 @@ class AppRoutes {
 	static const professionalSettings = '/professional/settings';
 
 	static const professionalsList = '/professionals';
-	static const professionalProfileDetail = '/professional-detail/:professionalId';
+	static const professionalProfileDetail = '/professionals/:professionalId';
 	static const notifications = '/notifications';
 	static const termsAndPolicy = '/terms-policy';
 
