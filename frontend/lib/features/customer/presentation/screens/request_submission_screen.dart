@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 //import '../../../../core/routing/app_routes.dart';
 import '../../../../core/theme/app_colors.dart';
@@ -7,16 +8,17 @@ import '../../../../core/theme/app_radii.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/widgets/custom_textfield.dart';
 import '../../../../core/widgets/primary_button.dart';
+import '../providers/service_request_notifier.dart';
 
-class RequestSubmissionScreen extends StatefulWidget {
+class RequestSubmissionScreen extends ConsumerStatefulWidget {
   const RequestSubmissionScreen({super.key});
 
   @override
-  State<RequestSubmissionScreen> createState() =>
+  ConsumerState<RequestSubmissionScreen> createState() =>
       _RequestSubmissionScreenState();
 }
 
-class _RequestSubmissionScreenState extends State<RequestSubmissionScreen> {
+class _RequestSubmissionScreenState extends ConsumerState<RequestSubmissionScreen> {
   final _issueTitleController = TextEditingController();
   final _descriptionController = TextEditingController();
   final _locationController = TextEditingController();
@@ -56,6 +58,24 @@ class _RequestSubmissionScreenState extends State<RequestSubmissionScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final srState = ref.watch(serviceRequestProvider);
+
+    ref.listen<ServiceRequestState>(serviceRequestProvider, (_, next) {
+      if (next.error != null) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text(next.error!), backgroundColor: AppColors.danger));
+        ref.read(serviceRequestProvider.notifier).clearError();
+      }
+      if (next.isSuccess) {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text('Request submitted successfully'),
+          backgroundColor: AppColors.success,
+        ));
+        ref.read(serviceRequestProvider.notifier).clearSuccess();
+        context.pop();
+      }
+    });
+
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
@@ -280,9 +300,23 @@ class _RequestSubmissionScreenState extends State<RequestSubmissionScreen> {
                         color: Colors.white,
                       ),
                       height: 52,
-                      onPressed: () {
-                        // TODO: handle submission
-                      },
+                     onPressed: srState.isLoading ? null : () {
+                      final title = _issueTitleController.text.trim();
+                      final desc  = _descriptionController.text.trim();
+                      final loc   = _locationController.text.trim();
+                      if (title.isEmpty || desc.isEmpty || loc.isEmpty) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('Please fill in all required fields')));
+                        return;
+                      }
+                      ref.read(serviceRequestProvider.notifier).createRequest(
+                        title:       title,
+                        description: desc,
+                        profession:  _profession,
+                        location:    loc,
+                        urgency:     _urgency.toLowerCase(),
+                      );
+                    },
                     ),
                   ],
                 ),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/routing/app_routes.dart';
 import '../../../../core/theme/app_colors.dart';
@@ -7,12 +8,16 @@ import '../../../../core/theme/app_radii.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../widgets/green_buttons.dart';
 import '../widgets/professional_bottom_nav_bar.dart';
+import '../../../customer/presentation/providers/service_request_notifier.dart';
 
-class JobsScreen extends StatelessWidget {
+class JobsScreen extends ConsumerWidget {
   const JobsScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
+    Widget build(BuildContext context, WidgetRef ref) {
+      final state = ref.watch(serviceRequestProvider);
+      final pending = state.requests.where((r) => r.isPending).toList();
+   
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
@@ -24,7 +29,7 @@ class JobsScreen extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // ── Inline header ──────────────────────
+                    //Inline header
                     Row(
                       children: [
                         IconButton(
@@ -53,50 +58,23 @@ class JobsScreen extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 22),
-                   
-                    // ── Job cards ──────────────────────────
-                    _JobCard(
-                      category: 'CARPENTER',
-                      location: 'Paris, France',
-                      title: 'Residential Electrical Panel Upgrade',
-                      description:
-                          'Looking for a licensed electrician to upgrade a 100-amp service to 200-amp in a brownstone. Permits required. Urgent start preferred.',
-                      onAccept: () => context.go(
-                        AppRoutes.jobDetailsPath('electrical-panel'),
-                      ),
-                    ),
-                    _JobCard(
-                      category: 'MAINTENANCE',
-                      location: 'Hawassa, Eth',
-                      title: 'Commercial HVAC Seasonal Inspection',
-                      description:
-                          'Quarterly inspection for a 5,000 sq ft office space. Focus on filter replacement, refrigerant checks, and thermostat calibration.',
-                      subLabel: 'Estimated',
-                      onAccept: () => context.go(
-                        AppRoutes.jobDetailsPath('hvac-inspection'),
-                      ),
-                    ),
-                    _JobCard(
-                      category: 'ELECTRICIAN',
-                      location: 'DC, USA',
-                      title: 'Smart Home Lighting Design & Install',
-                      description:
-                          'New construction requiring full Lutron integration across 4 zones. Design consult needed before final installation phase.',
-                      subLabel: 'Project Budget',
-                      onAccept: () => context.go(
-                        AppRoutes.jobDetailsPath('smart-lighting'),
-                      ),
-                    ),
-                    _JobCard(
-                      category: 'PLUMBING',
-                      location: '4Kilo, A.A',
-                      title: 'Gourmet Kitchen Faucet Replacement',
-                      description:
-                          'Installation of a high-end touchless faucet. Under-sink filter also needs reconnection. Easy 1-hour job for a skilled Pro.',
-                      onAccept: () => context.go(
-                        AppRoutes.jobDetailsPath('kitchen-faucet'),
-                      ),
-                    ),
+                  
+                      if (state.isLoading && pending.isEmpty)
+                         const Center(child: CircularProgressIndicator())
+                      else if (pending.isEmpty)
+                        Center(
+                          child: Text('No jobs available',
+                              style: AppTextStyles.bodyMedium
+                                  .copyWith(color: AppColors.textMuted)),
+                        )
+                      else
+                        ...pending.map((r) => _JobCard(
+                          category:    r.profession.toUpperCase(),
+                          location:    r.location,
+                          title:       r.title,
+                          description: r.description,
+                          onAccept: () => context.push(AppRoutes.jobDetailsPath(r.id)),
+                        )),
                   ],
                 ),
               ),
@@ -105,14 +83,11 @@ class JobsScreen extends StatelessWidget {
               currentIndex: 1,
               onTap: (index) {
                 switch (index) {
-                  case 0:
-                    context.push(AppRoutes.professionalDashboard);
+                  case 0: context.push(AppRoutes.professionalDashboard);
                     break;
-                  case 2:
-                    context.push(AppRoutes.professionalsList);
+                  case 2: context.push(AppRoutes.professionalsList);
                     break;
-                  case 3:
-                    context.push(AppRoutes.professionalSettings);
+                  case 3: context.push(AppRoutes.professionalSettings);
                     break;
                 }
               },
@@ -130,7 +105,7 @@ class _JobCard extends StatelessWidget {
     required this.location,
     required this.title,
     required this.description,
-    this.subLabel,
+    this.subLabel, 
     this.onAccept,
   });
 
