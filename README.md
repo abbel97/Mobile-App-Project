@@ -22,7 +22,7 @@
 
 #### Request Handling Options (We may do both)
 - **Option A:** Customer selects and assigns a specific Service Provider
-- **Option B:** Customer submits a request, and Professional can view and accept it
+- **Option B:** Customer submits a request, and Professional can view and apply and customer can select    and confirm.
 ---
 ### Professional Flow
 1. Register and Login
