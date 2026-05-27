@@ -23,8 +23,7 @@ class ServiceRequestState {
     bool?   isSuccess,
     bool clearError   = false,
     bool clearSuccess = false,
-  }) =>
-      ServiceRequestState(
+  }) => ServiceRequestState(
         requests:  requests  ?? this.requests,
         isLoading: isLoading ?? this.isLoading,
         error:     clearError   ? null  : error     ?? this.error,
