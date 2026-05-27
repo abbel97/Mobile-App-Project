@@ -43,9 +43,12 @@ function updateRequest(req, res) {
   try {
     const { id } = req.params;
     const rows = query('SELECT * FROM service_requests WHERE id = ?', [id]);
-    if (rows.length === 0)        return res.status(404).json({ message: 'Request not found' });
-    if (rows[0].customer_id !== req.user.id) return res.status(403).json({ message: 'Access denied' });
-    if (rows[0].status !== 'pending')        return res.status(400).json({ message: 'Only pending requests can be edited' });
+    if (rows.length === 0)    
+        return res.status(404).json({ message: 'Request not found' });
+    if (rows[0].customer_id !== req.user.id) 
+      return res.status(403).json({ message: 'Access denied' });
+    if (rows[0].status !== 'pending')    
+        return res.status(400).json({ message: 'Only pending requests can be edited' });
 
     const r   = rows[0];
     const now = new Date().toISOString();
@@ -63,8 +66,10 @@ function deleteRequest(req, res) {
   try {
     const { id } = req.params;
     const rows = query('SELECT * FROM service_requests WHERE id = ?', [id]);
-    if (rows.length === 0)               return res.status(404).json({ message: 'Request not found' });
-    if (rows[0].customer_id !== req.user.id) return res.status(403).json({ message: 'Access denied' });
+    if (rows.length === 0)
+      return res.status(404).json({ message: 'Request not found' });
+    if (rows[0].customer_id !== req.user.id) 
+      return res.status(403).json({ message: 'Access denied' });
     run('DELETE FROM service_requests WHERE id = ?', [id]);
     return res.json({ message: 'Request deleted' });
   } catch { return res.status(500).json({ message: 'Server error' }); }
@@ -74,8 +79,10 @@ function acceptRequest(req, res) {
   try {
     const { id } = req.params;
     const rows = query('SELECT * FROM service_requests WHERE id = ?', [id]);
-    if (rows.length === 0)           return res.status(404).json({ message: 'Request not found' });
-    if (rows[0].status !== 'pending') return res.status(400).json({ message: 'Request no longer available' });
+    if (rows.length === 0)         
+      return res.status(404).json({ message: 'Request not found' });
+    if (rows[0].status !== 'pending') 
+      return res.status(400).json({ message: 'Request no longer available' });
 
     const now = new Date().toISOString();
     run(`UPDATE service_requests SET status='accepted', accepted_by=?, updated_at=? WHERE id=?`,

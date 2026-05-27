@@ -10,9 +10,12 @@ const sign = (id, role) =>
 
 async function registerCustomer(req, res) {
   try {
-    const { name, email, password } = req.body;
-    if (!name || !email || !password)
-      return res.status(400).json({ message: 'Name, email and password are required' });
+    const { name, email, password, confirmPassword } = req.body;
+    if (!name || !email || !password || !confirmPassword)
+      return res.status(400).json({ message: 'Name, email and passwords are required' });
+
+    if (password !== confirmPassword)
+      return res.status(400).json({ message: 'Passwords do not match' });
 
     if (query('SELECT id FROM users WHERE email = ?', [email]).length > 0)
       return res.status(409).json({ message: 'Email already in use' });
@@ -20,8 +23,8 @@ async function registerCustomer(req, res) {
     const id  = crypto.randomUUID();
     const now = new Date().toISOString();
     run(
-      'INSERT INTO users (id, name, email, password, role, created_at) VALUES (?,?,?,?,?,?)',
-      [id, name, email, await bcrypt.hash(password, 10), 'customer', now]
+      'INSERT INTO users (id, name, email, password, confirm_password, role, created_at) VALUES (?,?,?,?,?,?,?)',
+      [id, name, email, await bcrypt.hash(password, 10), await bcrypt.hash(confirmPassword, 10), 'customer', now]
     );
 
     return res.status(201).json({
