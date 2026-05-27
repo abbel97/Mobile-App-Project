@@ -40,7 +40,8 @@ class _CustomerRegisterScreenState
     final name     = _nameController.text.trim();
     final email    = _emailController.text.trim();
     final password = _passController.text;
-    if (name.isEmpty || email.isEmpty || password.isEmpty) {
+    final confirmPassword = _confirmPassController.text;
+    if (name.isEmpty || email.isEmpty || password.isEmpty || confirmPassword.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Please fill in all fields')));
       return;
@@ -51,7 +52,7 @@ class _CustomerRegisterScreenState
       return;
     }
     ref.read(authProvider.notifier).registerCustomer(
-      name: name, email: email, password: password,
+      name: name, email: email, password: password, confirmPassword: confirmPassword
     );
   }
 

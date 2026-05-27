@@ -3,7 +3,7 @@ import '../../data/repositories/auth_repositories_impl.dart';
 import '../../domain/entities/user_entity.dart';
 import '../../../../core/errors/failure.dart';
 
-// ── State ────────────────────────────────────────────────
+//State 
 class AuthState {
   final UserEntity? user;
   final bool isLoading;
@@ -37,7 +37,7 @@ class AuthState {
       );
 }
 
-// ── Notifier ─────────────────────────────────────────────
+// Notifier
 class AuthNotifier extends StateNotifier<AuthState> {
   final AuthRepositoryImpl _repo;
 
@@ -69,11 +69,12 @@ class AuthNotifier extends StateNotifier<AuthState> {
     required String name,
     required String email,
     required String password,
+    required String confirmPassword,
   }) async {
     state = state.copyWith(isLoading: true, clearError: true);
     try {
       final user = await _repo.registerCustomer(
-        name: name, email: email, password: password,
+        name: name, email: email, password: password, confirmPassword: confirmPassword,
       );
       state = state.copyWith(user: user, isLoading: false);
     } on Failure catch (e) {
@@ -148,7 +149,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
   void clearError() => state = state.copyWith(clearError: true);
 }
 
-// ── Providers ─────────────────────────────────────────────
+//Providers 
 final authRepositoryProvider = Provider<AuthRepositoryImpl>(
   (_) => AuthRepositoryImpl(),
 );

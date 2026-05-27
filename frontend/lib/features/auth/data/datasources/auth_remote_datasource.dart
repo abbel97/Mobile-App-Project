@@ -29,10 +29,11 @@ class AuthRemoteDataSource {
     required String name,
     required String email,
     required String password,
+    required String confirmPassword,
   }) async {
     final res = await ApiClient.post(
       '/auth/register/customer',
-      {'name': name, 'email': email, 'password': password, 'confirmPassword': password},
+      {'name': name, 'email': email, 'password': password, 'confirmPassword': confirmPassword},
       auth: false,
     );
     final body = jsonDecode(res.body) as Map<String, dynamic>;

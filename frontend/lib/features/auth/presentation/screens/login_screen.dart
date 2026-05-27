@@ -32,7 +32,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   }
 
   void _login() {
-    final email    = _emailController.text.trim();
+    final email =    _emailController.text.trim();
     final password = _passController.text;
     if (email.isEmpty || password.isEmpty) {
       _showSnackBar('Please fill in all fields');
@@ -136,7 +136,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           ? const SizedBox(
                               width: 18, height: 18,
                               child: CircularProgressIndicator(
-                                  color: Colors.white, strokeWidth: 2))
+                                  color: Colors.white, strokeWidth: 2
+                                  )
+                                )
                           : const Icon(Icons.arrow_forward,
                               size: 20, color: Colors.white),
                       onPressed: auth.isLoading ? null : _login,

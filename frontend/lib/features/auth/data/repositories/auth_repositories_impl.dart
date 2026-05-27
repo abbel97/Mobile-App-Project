@@ -28,13 +28,14 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
-  Future<UserEntity> registerCustomer({
+  Future<UserEntity> registerCustomer({ 
     required String name,
     required String email,
     required String password,
+    required String confirmPassword,
   }) async {
     final user = await _remote.registerCustomer(
-      name: name, email: email, password: password,
+      name: name, email: email, password: password, confirmPassword: confirmPassword,
     );
     return _saveAndReturn(user);
   }
@@ -73,8 +74,7 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<void> changePassword({
     required String currentPassword,
     required String newPassword,
-  }) =>
-      _remote.changePassword(
+  }) => _remote.changePassword(
         currentPassword: currentPassword,
         newPassword: newPassword,
       );
