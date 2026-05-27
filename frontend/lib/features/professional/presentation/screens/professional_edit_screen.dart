@@ -1,44 +1,48 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_radii.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/widgets/primary_button.dart';
+import '../../../auth/presentation/providers/auth_notifier.dart';
+import '../../domain/entities/professional_entity.dart';
+import '../providers/professional_notifier.dart';
 
-class ProfessionalEditScreen extends StatefulWidget {
+class ProfessionalEditScreen extends ConsumerStatefulWidget {
   const ProfessionalEditScreen({super.key});
 
   @override
-  State<ProfessionalEditScreen> createState() => _ProfessionalEditScreenState();
+  ConsumerState<ProfessionalEditScreen> createState() =>
+      _ProfessionalEditScreenState();
 }
 
-class _ProfessionalEditScreenState extends State<ProfessionalEditScreen> {
-  final _bioController = TextEditingController(
-    text:
-        'With over 12 years of specialized experience in residential electrical systems and cutting-edge smart home integrations, I provide homeowners with meticulous, future-proof solutions. My approach combines architectural precision with modern technological excellence.',
-  );
-  final _locationController = TextEditingController(text: 'Ethiopia, A.A');
-  final _rateController = TextEditingController(text: '12.00');
-
+class _ProfessionalEditScreenState extends ConsumerState<ProfessionalEditScreen> {
+  final _bioController = TextEditingController();
+  final _locationController = TextEditingController();
+  final _professionController = TextEditingController();
+  final _experienceController = TextEditingController();
+  final _educationController = TextEditingController();
+  final _rateController = TextEditingController();
 
   int _bioCharCount = 0;
   static const int _maxBioChars = 5000;
 
-  List<String> _skills = [
-    'Electrical Panels',
-    'Smart Lighting',
-    'EV Charging',
-    'Whole Home Audio',
-    'Surge Protection',
-  ];
+  List<String> _skills = [];
+  List<String> _certifications = [];
+  bool _seededFromProfile = false;
 
   @override
   void initState() {
     super.initState();
-    _bioCharCount = _bioController.text.length;
     _bioController.addListener(() {
+      if (!mounted) return;
       setState(() => _bioCharCount = _bioController.text.length);
+    });
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(professionalProvider.notifier).loadMyProfile();
     });
   }
 
@@ -46,22 +50,50 @@ class _ProfessionalEditScreenState extends State<ProfessionalEditScreen> {
   void dispose() {
     _bioController.dispose();
     _locationController.dispose();
+    _professionController.dispose();
+    _experienceController.dispose();
+    _educationController.dispose();
+    _rateController.dispose();
     super.dispose();
   }
 
-  void _showAddSkillDialog() {
+  void _seedFields(ProfessionalEntity profile) {
+    _professionController.text = profile.profession;
+    _bioController.text = profile.bio;
+    _locationController.text = profile.location;
+    _experienceController.text = profile.experienceYears.toString();
+    _educationController.text = profile.educationLevel;
+    _rateController.text = profile.serviceRate.toStringAsFixed(2);
+
+    _skills = _splitCsv(profile.bio).take(0).toList();
+    _certifications = [];
+    _bioCharCount = _bioController.text.length;
+  }
+
+  List<String> _splitCsv(String value) {
+    return value
+        .split(',')
+        .map((part) => part.trim())
+        .where((part) => part.isNotEmpty)
+        .toList();
+  }
+
+  Future<void> _showAddItemDialog({
+    required String title,
+    required void Function(String) onAdd,
+  }) async {
     final controller = TextEditingController();
-    showDialog(
+    await showDialog<void>(
       context: context,
       builder: (_) => AlertDialog(
         title: Text(
-          'Add Skill',
+          title,
           style: AppTextStyles.titleMedium.copyWith(color: AppColors.textPrimary),
         ),
         content: TextField(
           controller: controller,
           autofocus: true,
-          decoration: const InputDecoration(hintText: 'e.g. Solar Panels'),
+          decoration: const InputDecoration(hintText: 'Type and tap Add'),
         ),
         actions: [
           TextButton(
@@ -70,8 +102,9 @@ class _ProfessionalEditScreenState extends State<ProfessionalEditScreen> {
           ),
           TextButton(
             onPressed: () {
-              if (controller.text.trim().isNotEmpty) {
-                setState(() => _skills.add(controller.text.trim()));
+              final text = controller.text.trim();
+              if (text.isNotEmpty) {
+                onAdd(text);
               }
               Navigator.of(context).pop();
             },
@@ -82,8 +115,68 @@ class _ProfessionalEditScreenState extends State<ProfessionalEditScreen> {
     );
   }
 
+  Future<void> _saveProfile() async {
+    final auth = ref.read(authProvider).user;
+    final profession = _professionController.text.trim();
+    final bio = _bioController.text.trim();
+    final location = _locationController.text.trim();
+    final experienceYears = int.tryParse(_experienceController.text.trim()) ?? 0;
+    final serviceRate = double.tryParse(_rateController.text.trim()) ?? 0;
+    final educationLevel = _educationController.text.trim();
+
+    if (profession.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Profession is required')),
+      );
+      return;
+    }
+
+    await ref.read(professionalProvider.notifier).updateMyProfile(
+          name: auth?.name ?? '',
+          email: auth?.email ?? '',
+          profession: profession,
+          bio: bio,
+          location: location,
+          experienceYears: experienceYears,
+          serviceRate: serviceRate,
+          educationLevel: educationLevel,
+        );
+  }
+
   @override
   Widget build(BuildContext context) {
+    final authState = ref.watch(authProvider);
+    final state = ref.watch(professionalProvider);
+
+    ref.listen<ProfessionalState>(professionalProvider, (_, next) {
+      if (!mounted) return;
+      if (next.error != null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(next.error!), backgroundColor: AppColors.danger),
+        );
+        ref.read(professionalProvider.notifier).clearError();
+      }
+      if (next.isSuccess) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Profile updated successfully')),
+        );
+        ref.read(professionalProvider.notifier).clearSuccess();
+      }
+    });
+
+    final profile = state.profile;
+    if (!_seededFromProfile && profile != null) {
+      _seedFields(profile);
+      _seededFromProfile = true;
+    }
+
+    final name = authState.user?.name.trim().isNotEmpty == true
+        ? authState.user!.name.trim()
+        : 'Professional User';
+    final email = authState.user?.email.trim().isNotEmpty == true
+        ? authState.user!.email.trim()
+        : 'No email';
+
     return Scaffold(
       resizeToAvoidBottomInset: false,
       backgroundColor: AppColors.background,
@@ -91,377 +184,194 @@ class _ProfessionalEditScreenState extends State<ProfessionalEditScreen> {
         child: Column(
           children: [
             Expanded(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        IconButton(
-                          onPressed: () => context.pop(),
-                          icon: const Icon(
-                            Icons.arrow_back_rounded,
-                            color: AppColors.primary,
-                          ),
-                        ),
-                        Text(
-                          'Edit Profile',
-                          style: AppTextStyles.titleMedium.copyWith(
-                            color: AppColors.primary,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 20),
-
-                    Center(
-                      child: Column(
-                        children: [
-                          Stack(
-                            clipBehavior: Clip.none,
-                            children: [
-                              Container(
-                                width: 100,
-                                height: 100,
-                                decoration: BoxDecoration(
-                                  color: AppColors.neutral,
-                                  borderRadius: BorderRadius.circular(AppRadii.md),
-                                ),
-                                child: const Icon(
-                                  Icons.person_outline_rounded,
-                                  size: 58,
-                                  color: AppColors.textPrimary,
-                                ),
-                              ),
-                              Positioned(
-                                right: -4,
-                                bottom: -4,
-                                child: Container(
-                                  width: 28,
-                                  height: 28,
-                                  decoration: BoxDecoration(
-                                    color: AppColors.surface,
-                                    borderRadius: BorderRadius.circular(6),
-                                    border: Border.all(color: AppColors.border),
-                                  ),
-                                  child: const Icon(
-                                    Icons.edit_outlined,
-                                    size: 14,
-                                    color: AppColors.primary,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 18),
-                          Text(
-                            'Abebe Kebede',
-                            style: AppTextStyles.headline2.copyWith(
-                              fontSize: 30,
-                              color: AppColors.textPrimary,
-                            ),
-                          ),
-                          const SizedBox(height: 6),
-                          Text(
-                            'Master Electrical & Smart Home Specialist',
-                            style: AppTextStyles.titleSmall.copyWith(
-                              color: AppColors.secondary,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    Stack(
-                      clipBehavior: Clip.none,
-                      children: [
-                        Container(
-                          width: 100,
-                          height: 100,
-                          decoration: BoxDecoration(
-                            color: AppColors.neutral,
-                            borderRadius: BorderRadius.circular(AppRadii.md),
-                          ),
-                          child: const Icon(
-                            Icons.person_outline_rounded,
-                            size: 58,
-                            color: AppColors.textPrimary,
-                          ),
-                        ),
-                        Positioned(
-                          right: -4,
-                          bottom: -4,
-                          child: Container(
-                            width: 28,
-                            height: 28,
-                            decoration: BoxDecoration(
-                              color: AppColors.surface,
-                              borderRadius: BorderRadius.circular(6),
-                              border: Border.all(color: AppColors.border),
-                            ),
-                            child: const Icon(
-                              Icons.edit_outlined,
-                              size: 14,
-                              color: AppColors.primary,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 18),
-                    Text(
-                      'Abebe Kebede',
-                      style: AppTextStyles.headline2.copyWith(
-                        fontSize: 24,
-                        color: AppColors.textPrimary,
-                      ),
-                    ),
-                    const SizedBox(height: 6),
-                    Text(
-                      'Master Electrical & Smart Home Specialist',
-                      style: AppTextStyles.titleSmall.copyWith(
-                        color: AppColors.secondary,
-                      ),
-                    ),
-                    const SizedBox(height: 28),
-
-                    // ── Professional Overview ──────────────
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          'PROFESSIONAL OVERVIEW',
-                          style: AppTextStyles.labelLarge.copyWith(
-                            color: AppColors.textPrimary,
-                          ),
-                        ),
-                        Text(
-                          '$_bioCharCount / $_maxBioChars characters',
-                          style: AppTextStyles.bodySmall.copyWith(
-                            color: AppColors.textMuted,
-                            fontSize: 12,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 10),
-                    TextField(
-                      controller: _bioController,
-                      maxLines: 6,
-                      style: AppTextStyles.bodyRegular.copyWith(
-                        color: AppColors.textPrimary,
-                      ),
-                      decoration: InputDecoration(
-                        hintText: 'Describe your professional experience...',
-                        filled: true,
-                        fillColor: AppColors.inputFill,
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(AppRadii.sm),
-                          borderSide: const BorderSide(color: AppColors.border),
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(AppRadii.sm),
-                          borderSide: const BorderSide(color: AppColors.border),
-                        ),
-                        contentPadding: const EdgeInsets.all(16),
-                      ),
-                    ),
-                    const SizedBox(height: 28),
-
-                    
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          'CERTIFICATIONS & LICENSES',
-                          style: AppTextStyles.labelLarge.copyWith(
-                            color: AppColors.textPrimary,
-                          ),
-                        ),
-                        GestureDetector(
-                          onTap: () {
-                            // TODO: add certification
-                          },
-                          child: Row(
-                            children: [
-                              const Icon(
-                                Icons.add_circle_outline_rounded,
-                                size: 16,
-                                color: AppColors.primary,
-                              ),
-                              const SizedBox(width: 4),
-                              Text(
-                                'Add New',
-                                style: AppTextStyles.bodySmall.copyWith(
-                                  color: AppColors.primary,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 12),
-                    const _CertCard(
-                      title: 'Master Electrician License',
-                      issuer: 'AAU Union of Contractors',
-                      year: '2026',
-                    ),
-                    const SizedBox(height: 10),
-                    const _CertCard(
-                      title: 'Uranium Platinum Certified Pro',
-                      issuer: 'AAU Electronics',
-                      year: '2025',
-                    ),
-                    const SizedBox(height: 28),
-
-                    Text(
-                      'PRIMARY LOCATION',
-                      style: AppTextStyles.labelLarge.copyWith(
-                        color: AppColors.textPrimary,
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                   TextField(
-                    controller: _locationController,
-                    style: AppTextStyles.bodyRegular.copyWith(
-                      color: AppColors.textPrimary,
-                    ),
-                    decoration: InputDecoration(
-                      hintText: 'Location',
-                      prefixIcon: const Icon(Icons.place_outlined),
-
-                      filled: true,
-                      fillColor: AppColors.inputFill,
-
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(AppRadii.sm),
-                      ),
-                    ),
-                  ),
-                    const SizedBox(height: 28),
-
-                    Text(
-                      'SPECIALIZED SKILLS',
-                      style: AppTextStyles.labelLarge.copyWith(
-                        color: AppColors.textPrimary,
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    Wrap(
-                      spacing: 10,
-                      runSpacing: 10,
-                      children: [
-                        ..._skills.map(
-                          (skill) => _RemovableSkillChip(
-                            label: skill,
-                            onRemove: () =>
-                                setState(() => _skills.remove(skill)),
-                          ),
-                        ),
-                        GestureDetector(
-                          onTap: _showAddSkillDialog,
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 14,
-                              vertical: 10,
-                            ),
-                            decoration: BoxDecoration(
-                              border: Border.all(
-                                color: AppColors.primary,
-                                style: BorderStyle.solid,
-                              ),
-                              borderRadius: BorderRadius.circular(AppRadii.sm),
-                            ),
-                            child: Text(
-                              '+ Add Skill',
-                              style: AppTextStyles.bodySmall.copyWith(
-                                color: AppColors.primary,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 28),
-
-                    
-                    Container(
-                      padding: const EdgeInsets.all(18),
-                      decoration: BoxDecoration(
-                        color: AppColors.surface,
-                        borderRadius: BorderRadius.circular(AppRadii.md),
-                        border: const Border(
-                          left: BorderSide(color: AppColors.primary, width: 4),
-                        ),
-                      ),
+              child: state.isLoading && profile == null
+                  ? const Center(child: CircularProgressIndicator())
+                  : SingleChildScrollView(
+                      padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            'SERVICE RATE',
-                            style: AppTextStyles.labelLarge.copyWith(
-                              color: AppColors.textMuted,
-                              fontSize: 11,
+                          Row(
+                            children: [
+                              IconButton(
+                                onPressed: () => context.pop(),
+                                icon: const Icon(
+                                  Icons.arrow_back_rounded,
+                                  color: AppColors.primary,
+                                ),
+                              ),
+                              Text(
+                                'Edit Profile',
+                                style: AppTextStyles.titleMedium.copyWith(
+                                  color: AppColors.primary,
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 20),
+                          Center(
+                            child: Column(
+                              children: [
+                                Container(
+                                  width: 96,
+                                  height: 96,
+                                  decoration: BoxDecoration(
+                                    color: AppColors.neutral,
+                                    borderRadius: BorderRadius.circular(AppRadii.md),
+                                  ),
+                                  child: const Icon(
+                                    Icons.person_outline_rounded,
+                                    size: 58,
+                                    color: AppColors.textPrimary,
+                                  ),
+                                ),
+                                const SizedBox(height: 14),
+                                Text(
+                                  name,
+                                  style: AppTextStyles.titleLarge.copyWith(
+                                    color: AppColors.textPrimary,
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  email,
+                                  style: AppTextStyles.bodyMedium.copyWith(
+                                    color: AppColors.textBody,
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
-                          const SizedBox(height: 8),
-                      Row(
-                      children: [
-                        const Text(
-                          '\$',
-                          style: TextStyle(fontSize: 28),
-                        ),
-
-                        const SizedBox(width: 6),
-
-                        Expanded(
-                          child: TextField(
-                            controller: _rateController,
+                          const SizedBox(height: 24),
+                          _label('PROFESSION'),
+                          const SizedBox(height: 10),
+                          _input(controller: _professionController, hint: 'Profession'),
+                          const SizedBox(height: 16),
+                          _label('EXPERIENCE (YEARS)'),
+                          const SizedBox(height: 10),
+                          _input(
+                            controller: _experienceController,
+                            hint: 'Years of experience',
                             keyboardType: TextInputType.number,
-                            style: AppTextStyles.headline2.copyWith(
-                              fontSize: 28,
+                          ),
+                          const SizedBox(height: 16),
+                          _label('EDUCATION LEVEL'),
+                          const SizedBox(height: 10),
+                          _input(controller: _educationController, hint: 'Education level'),
+                          const SizedBox(height: 24),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              _label('PROFESSIONAL OVERVIEW'),
+                              Text(
+                                '$_bioCharCount / $_maxBioChars',
+                                style: AppTextStyles.bodySmall.copyWith(
+                                  color: AppColors.textMuted,
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 10),
+                          TextField(
+                            controller: _bioController,
+                            maxLines: 6,
+                            style: AppTextStyles.bodyRegular.copyWith(
                               color: AppColors.textPrimary,
                             ),
-                            decoration: const InputDecoration(
-                              border: InputBorder.none,
-                              hintText: '0.00',
+                            decoration: _fieldDecoration('Describe your experience...'),
+                          ),
+                          const SizedBox(height: 24),
+                          _label('PRIMARY LOCATION'),
+                          const SizedBox(height: 10),
+                          _input(
+                            controller: _locationController,
+                            hint: 'Location',
+                            prefixIcon: const Icon(Icons.place_outlined),
+                          ),
+                          const SizedBox(height: 24),
+                          _sectionHeader(
+                            title: 'CERTIFICATIONS',
+                            onAdd: () => _showAddItemDialog(
+                              title: 'Add Certificate',
+                              onAdd: (value) {
+                                setState(() => _certifications.add(value));
+                              },
                             ),
                           ),
-                        ),
-
-                        Text(
-                          '/hr',
-                          style: AppTextStyles.bodyMedium.copyWith(
-                            color: AppColors.textMuted,
-                          ),
-                        ),
-                      ],
-                    ),
-                          const SizedBox(height: 8),
-                          GestureDetector(
-                            onTap: () {
-                              // TODO: change hourly rate
+                          const SizedBox(height: 10),
+                          _tagWrap(
+                            values: _certifications,
+                            emptyText: 'No certificates added yet',
+                            onRemove: (item) {
+                              setState(() => _certifications.remove(item));
                             },
-                            child: Text(
-                              'Change hourly rate',
-                              style: AppTextStyles.titleSmall.copyWith(
-                                color: AppColors.primary,
-                              ),
+                          ),
+                          const SizedBox(height: 24),
+                          _sectionHeader(
+                            title: 'SPECIALIZED SKILLS',
+                            onAdd: () => _showAddItemDialog(
+                              title: 'Add Skill',
+                              onAdd: (value) {
+                                setState(() => _skills.add(value));
+                              },
                             ),
                           ),
+                          const SizedBox(height: 10),
+                          _tagWrap(
+                            values: _skills,
+                            emptyText: 'No skills added yet',
+                            onRemove: (item) {
+                              setState(() => _skills.remove(item));
+                            },
+                          ),
+                          const SizedBox(height: 24),
+                          _label('HOURLY RATE'),
+                          const SizedBox(height: 10),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: AppColors.inputFill,
+                              borderRadius: BorderRadius.circular(AppRadii.sm),
+                              border: Border.all(color: AppColors.border),
+                            ),
+                            child: Row(
+                              children: [
+                                Text(
+                                  '\$',
+                                  style: AppTextStyles.titleLarge.copyWith(
+                                    color: AppColors.textPrimary,
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                Expanded(
+                                  child: TextField(
+                                    controller: _rateController,
+                                    keyboardType: const TextInputType.numberWithOptions(
+                                      decimal: true,
+                                    ),
+                                    decoration: const InputDecoration(
+                                      border: InputBorder.none,
+                                      hintText: '0.00',
+                                    ),
+                                    style: AppTextStyles.titleLarge.copyWith(
+                                      color: AppColors.textPrimary,
+                                    ),
+                                  ),
+                                ),
+                                Text(
+                                  '/hr',
+                                  style: AppTextStyles.bodyMedium.copyWith(
+                                    color: AppColors.textMuted,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 24),
                         ],
                       ),
                     ),
-                    const SizedBox(height: 32),
-                  ],
-                ),
-              ),
             ),
-
-            // ── Persistent bottom buttons ──────────────────
             Container(
               padding: const EdgeInsets.fromLTRB(20, 12, 20, 16),
               decoration: const BoxDecoration(
@@ -486,18 +396,15 @@ class _ProfessionalEditScreenState extends State<ProfessionalEditScreen> {
                         style: AppTextStyles.buttonSmall.copyWith(
                           color: AppColors.textPrimary,
                         ),
-                        textAlign: TextAlign.center,
                       ),
                     ),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
                     child: PrimaryButton(
-                      label: 'Save Changes',
+                      label: state.isSaving ? 'Saving...' : 'Save Changes',
                       height: 52,
-                      onPressed: () {
-                        // TODO: handle save
-                      },
+                      onPressed: state.isSaving ? null : _saveProfile,
                     ),
                   ),
                 ],
@@ -508,64 +415,94 @@ class _ProfessionalEditScreenState extends State<ProfessionalEditScreen> {
       ),
     );
   }
-}
 
-class _CertCard extends StatelessWidget {
-  const _CertCard({
-    required this.title,
-    required this.issuer,
-    required this.year,
-  });
+  Widget _label(String value) {
+    return Text(
+      value,
+      style: AppTextStyles.labelLarge.copyWith(color: AppColors.textPrimary),
+    );
+  }
 
-  final String title;
-  final String issuer;
-  final String year;
+  Widget _input({
+    required TextEditingController controller,
+    required String hint,
+    TextInputType? keyboardType,
+    Widget? prefixIcon,
+  }) {
+    return TextField(
+      controller: controller,
+      keyboardType: keyboardType,
+      style: AppTextStyles.bodyRegular.copyWith(color: AppColors.textPrimary),
+      decoration: _fieldDecoration(hint, prefixIcon: prefixIcon),
+    );
+  }
 
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
+  InputDecoration _fieldDecoration(String hint, {Widget? prefixIcon}) {
+    return InputDecoration(
+      hintText: hint,
+      prefixIcon: prefixIcon,
+      filled: true,
+      fillColor: AppColors.inputFill,
+      border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(AppRadii.sm),
-        border: Border.all(color: AppColors.border),
+        borderSide: const BorderSide(color: AppColors.border),
       ),
-      child: Row(
-        children: [
-          const Icon(
-            Icons.verified_outlined,
-            color: AppColors.secondary,
-            size: 28,
-          ),
-          const SizedBox(width: 14),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: AppTextStyles.titleSmall.copyWith(
-                    color: AppColors.textPrimary,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  '$issuer • Issued $year',
-                  style: AppTextStyles.bodySmall.copyWith(
-                    color: AppColors.textBody,
-                  ),
-                ),
-              ],
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(AppRadii.sm),
+        borderSide: const BorderSide(color: AppColors.border),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(AppRadii.sm),
+        borderSide: const BorderSide(color: AppColors.primary),
+      ),
+      contentPadding: const EdgeInsets.all(14),
+    );
+  }
+
+  Widget _sectionHeader({required String title, required VoidCallback onAdd}) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        _label(title),
+        TextButton.icon(
+          onPressed: onAdd,
+          icon: const Icon(Icons.add_circle_outline_rounded, size: 16),
+          label: const Text('Add'),
+        ),
+      ],
+    );
+  }
+
+  Widget _tagWrap({
+    required List<String> values,
+    required String emptyText,
+    required void Function(String) onRemove,
+  }) {
+    if (values.isEmpty) {
+      return Text(
+        emptyText,
+        style: AppTextStyles.bodySmall.copyWith(color: AppColors.textMuted),
+      );
+    }
+
+    return Wrap(
+      spacing: 10,
+      runSpacing: 10,
+      children: values
+          .map(
+            (item) => _RemovableTag(
+              label: item,
+              onRemove: () => onRemove(item),
             ),
-          ),
-        ],
-      ),
+          )
+          .toList(),
     );
   }
 }
 
-class _RemovableSkillChip extends StatelessWidget {
-  const _RemovableSkillChip({required this.label, required this.onRemove});
+class _RemovableTag extends StatelessWidget {
+  const _RemovableTag({required this.label, required this.onRemove});
+
   final String label;
   final VoidCallback onRemove;
 
@@ -591,11 +528,7 @@ class _RemovableSkillChip extends StatelessWidget {
           const SizedBox(width: 8),
           GestureDetector(
             onTap: onRemove,
-            child: const Icon(
-              Icons.close,
-              size: 14,
-              color: AppColors.textMuted,
-            ),
+            child: const Icon(Icons.close, size: 14, color: AppColors.textMuted),
           ),
         ],
       ),

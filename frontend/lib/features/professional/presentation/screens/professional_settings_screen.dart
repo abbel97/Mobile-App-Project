@@ -25,6 +25,14 @@ class _ProfessionalSettingsScreenState
 
   @override
   Widget build(BuildContext context) {
+    final auth = ref.watch(authProvider);
+    final name = auth.user?.name.trim().isNotEmpty == true
+        ? auth.user!.name.trim()
+        : 'Professional User';
+    final email = auth.user?.email.trim().isNotEmpty == true
+        ? auth.user!.email.trim()
+        : 'No email';
+
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
@@ -74,9 +82,16 @@ class _ProfessionalSettingsScreenState
                           ),
                           const SizedBox(height: 16),
                           Text(
-                            'Abebe Kebede',
+                            name,
                             style: AppTextStyles.titleLarge.copyWith(
                               color: AppColors.primary,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            email,
+                            style: AppTextStyles.bodyMedium.copyWith(
+                              color: AppColors.textBody,
                             ),
                           ),
                           const SizedBox(height: 8),
