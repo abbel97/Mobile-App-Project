@@ -105,7 +105,6 @@ class _JobCard extends StatelessWidget {
     required this.location,
     required this.title,
     required this.description,
-    this.subLabel, 
     this.onAccept,
   });
 
@@ -113,7 +112,6 @@ class _JobCard extends StatelessWidget {
   final String location;
   final String title;
   final String description;
-  final String? subLabel;
   final VoidCallback? onAccept;
 
   @override
@@ -172,16 +170,7 @@ class _JobCard extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 22),
-          if (subLabel != null) ...[
-            Text(
-              subLabel!,
-              style: AppTextStyles.bodySmall.copyWith(
-                color: AppColors.textMuted,
-              ),
-            ),
-            const SizedBox(height: 10),
-          ],
-          GreenButton(label: 'Accept Job', onPressed: onAccept),
+          GreenButton(label: 'Apply', onPressed: onAccept),
         ],
       ),
     );

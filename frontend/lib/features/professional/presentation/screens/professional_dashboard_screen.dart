@@ -1,17 +1,22 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/routing/app_routes.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_radii.dart';
 import '../../../../core/theme/app_text_styles.dart';
+import '../../../auth/presentation/providers/auth_notifier.dart';
 import '../widgets/professional_bottom_nav_bar.dart';
 
-class ProfessionalDashboardScreen extends StatelessWidget {
+class ProfessionalDashboardScreen extends ConsumerWidget {
   const ProfessionalDashboardScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final auth = ref.watch(authProvider);
+    final firstName = _firstName(auth.user?.name);
+
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
@@ -59,7 +64,7 @@ class ProfessionalDashboardScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: 18),
                     Text(
-                      'Hello, Elphaz.',
+                      'Hello, $firstName.',
                       style: AppTextStyles.headline2.copyWith(
                         fontSize: 34,
                         color: AppColors.primary,
@@ -185,6 +190,12 @@ class ProfessionalDashboardScreen extends StatelessWidget {
       ),
     );
   }
+}
+
+String _firstName(String? name) {
+  final value = name?.trim() ?? '';
+  if (value.isEmpty) return 'there';
+  return value.split(RegExp(r'\s+')).first;
 }
 
 class _MetricCard extends StatelessWidget {
