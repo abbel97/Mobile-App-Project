@@ -100,6 +100,8 @@ final routerProvider = Provider<GoRouter>((ref) {
           builder: (context, state) => const RequestSubmissionScreen()),
       GoRoute(path: AppRoutes.customerRequests,
           builder: (context, state) => const RecentRequestsScreen()),
+        GoRoute(path: AppRoutes.customerProfessionalsList,
+          builder: (context, state) => const ProfessionalsListScreen()),
       GoRoute(
         path: AppRoutes.customerRequestEdit,
         builder: (context, state) => EditRequestScreen(
