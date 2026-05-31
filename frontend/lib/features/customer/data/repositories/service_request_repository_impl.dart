@@ -14,13 +14,16 @@ class ServiceRequestRepositoryImpl implements ServiceRequestRepository {
 
   @override
   Future<List<ServiceRequestEntity>> getRequests() async {
-    // Cache first
-    final cached = await _local.getRequests();
-    if (cached.isNotEmpty) return cached;
-    // cache miss -> network
-    final remote = await _remote.getRequests();
-    await _local.saveRequests(remote);
-    return remote;
+    try {
+      final remote = await _remote.getRequests();
+      await _local.clearAll();
+      await _local.saveRequests(remote);
+      return remote;
+    } catch (_) {
+      final cached = await _local.getRequests();
+      if (cached.isNotEmpty) return cached;
+      rethrow;
+    }
   }
 
   @override
@@ -38,10 +41,12 @@ class ServiceRequestRepositoryImpl implements ServiceRequestRepository {
     required String profession,
     required String location,
     String urgency = 'regular',
+    String? photoBase64,
   }) async {
     final r = await _remote.createRequest(
       title: title, description: description,
-      profession: profession, location: location, urgency: urgency,
+      profession: profession, location: location,
+      urgency: urgency, photoBase64: photoBase64,
     );
     await _local.saveRequest(r);
     return r;

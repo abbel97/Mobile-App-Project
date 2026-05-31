@@ -39,7 +39,7 @@ class ServiceRequestNotifier extends StateNotifier<ServiceRequestState> {
   }
 
   Future<void> loadRequests() async {
-    state = state.copyWith(isLoading: true, clearError: true);
+    state = state.copyWith(isLoading: true, clearError: true, requests: const []);
     try {
       final list = await _repo.getRequests();
       state = state.copyWith(requests: list, isLoading: false);
@@ -51,7 +51,7 @@ class ServiceRequestNotifier extends StateNotifier<ServiceRequestState> {
   }
 
   Future<void> refreshRequests() async {
-    state = state.copyWith(isLoading: true, clearError: true);
+    state = state.copyWith(isLoading: true, clearError: true, requests: const []);
     try {
       final list = await _repo.refreshRequests();
       state = state.copyWith(requests: list, isLoading: false);
@@ -68,12 +68,14 @@ class ServiceRequestNotifier extends StateNotifier<ServiceRequestState> {
     required String profession,
     required String location,
     String urgency = 'regular',
+    String? photoBase64,
   }) async {
     state = state.copyWith(isLoading: true, clearError: true, clearSuccess: true);
     try {
       final r = await _repo.createRequest(
         title: title, description: description,
         profession: profession, location: location, urgency: urgency,
+        photoBase64: photoBase64,
       );
       state = state.copyWith(
         requests:  [r, ...state.requests],

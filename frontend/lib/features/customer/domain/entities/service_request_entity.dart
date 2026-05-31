@@ -6,12 +6,14 @@ class ServiceRequestEntity extends Equatable {
   final String  description;
   final String  profession;
   final String  location;
+  final String? customerName;
   final String  status;
   final String  urgency;
   final String  customerId;
   final String? acceptedBy;
   final String  createdAt;
   final String  updatedAt;
+  final String? photoBase64;
 
   const ServiceRequestEntity({
     required this.id,
@@ -19,10 +21,12 @@ class ServiceRequestEntity extends Equatable {
     required this.description,
     required this.profession,
     required this.location,
+    this.customerName,
     required this.status,
     required this.urgency,
     required this.customerId,
     this.acceptedBy,
+    this.photoBase64,
     required this.createdAt,
     required this.updatedAt,
   });
@@ -31,5 +35,5 @@ class ServiceRequestEntity extends Equatable {
   bool get isAccepted => status == 'accepted';
 
   @override
-  List<Object?> get props => [id, status];
+  List<Object?> get props => [id, status, customerName];
 }

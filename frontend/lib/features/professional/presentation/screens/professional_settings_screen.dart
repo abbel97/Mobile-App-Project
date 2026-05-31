@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../auth/presentation/providers/auth_notifier.dart';
+import '../../../professional/presentation/providers/professional_notifier.dart';
 
 import '../../../../core/routing/app_routes.dart';
 import '../../../../core/theme/app_colors.dart';
@@ -10,6 +11,7 @@ import '../../../../core/theme/app_text_styles.dart';
 import '../../../../features/shared/presentation/widgets/delete_account_dialog.dart';
 import '../../../../features/shared/presentation/widgets/logout_dialog.dart';
 import '../widgets/professional_bottom_nav_bar.dart';
+import '../../../../core/widgets/profile_image_picker.dart';
 
 class ProfessionalSettingsScreen extends ConsumerStatefulWidget {
   const ProfessionalSettingsScreen({super.key});
@@ -24,8 +26,18 @@ class _ProfessionalSettingsScreenState
   bool _darkMode = false;
 
   @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      ref.read(professionalProvider.notifier).loadMyProfile();
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     final auth = ref.watch(authProvider);
+    final profile = ref.watch(professionalProvider).myProfile;
     final name = auth.user?.name.trim().isNotEmpty == true
         ? auth.user!.name.trim()
         : 'Professional User';
@@ -60,36 +72,21 @@ class _ProfessionalSettingsScreenState
                     Center(
                       child: Column(
                         children: [
-                          Container(
-                            width: 90,
-                            height: 90,
-                            decoration: BoxDecoration(
-                              color: AppColors.surface,
-                              borderRadius: BorderRadius.circular(AppRadii.md),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withValues(alpha: 0.06),
-                                  blurRadius: 14,
-                                  offset: const Offset(0, 6),
-                                ),
-                              ],
-                            ),
-                            child: const Icon(
-                              Icons.person_outline_rounded,
-                              size: 68,
-                              color: AppColors.textPrimary,
-                            ),
+                          profileImageWidget(
+                            base64Image: profile?.photoBase64 ?? auth.user?.photoBase64,
+                            size: 90,
+                            round: true,
                           ),
                           const SizedBox(height: 16),
                           Text(
-                            name,
+                            profile?.name ?? name,
                             style: AppTextStyles.titleLarge.copyWith(
                               color: AppColors.primary,
                             ),
                           ),
                           const SizedBox(height: 4),
                           Text(
-                            email,
+                            profile?.email ?? email,
                             style: AppTextStyles.bodyMedium.copyWith(
                               color: AppColors.textBody,
                             ),
@@ -126,7 +123,7 @@ class _ProfessionalSettingsScreenState
                           title: 'Dark Mode',
                           subtitle: '',
                           value: _darkMode,
-                          // TODO: implement dark mode theme switching
+                          // TODO
                           onChanged: (val) =>
                               setState(() => _darkMode = val),
                         ),
@@ -244,14 +241,11 @@ class _ProfessionalSettingsScreenState
               currentIndex: 3,
               onTap: (index) {
                 switch (index) {
-                  case 0:
-                    context.go(AppRoutes.professionalDashboard);
+                  case 0: context.go(AppRoutes.professionalDashboard);
                     break;
-                  case 1:
-                    context.go(AppRoutes.jobs);
+                  case 1: context.go(AppRoutes.jobs);
                     break;
-                  case 2:
-                    context.go(AppRoutes.professionalsList);
+                  case 2: context.go(AppRoutes.professionalsList);
                     break;
                 }
               },

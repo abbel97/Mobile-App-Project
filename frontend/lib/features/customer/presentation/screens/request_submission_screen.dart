@@ -9,6 +9,9 @@ import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/widgets/custom_textfield.dart';
 import '../../../../core/widgets/primary_button.dart';
 import '../providers/service_request_notifier.dart';
+import '../../../../core/widgets/profile_image_picker.dart';
+import 'dart:convert';
+
 
 class RequestSubmissionScreen extends ConsumerStatefulWidget {
   const RequestSubmissionScreen({super.key});
@@ -24,6 +27,7 @@ class _RequestSubmissionScreenState extends ConsumerState<RequestSubmissionScree
   final _locationController = TextEditingController();
   String _profession = 'General Handyman';
   String _urgency = 'REGULAR';
+  String? _photoBase64;
 
   final List<String> _professions = [
     'General Handyman',
@@ -243,52 +247,76 @@ class _RequestSubmissionScreenState extends ConsumerState<RequestSubmissionScree
                       ),
                     ),
                     const SizedBox(height: 12),
+                    
                     GestureDetector(
-                      onTap: () {
-                        // TODO: implement file picker
+                      onTap: () async {
+                        final b64 = await pickImageAsBase64();
+                        if (b64 != null) setState(() => _photoBase64 = b64);
                       },
                       child: Container(
                         width: double.infinity,
                         height: 160,
                         decoration: BoxDecoration(
-                          color: AppColors.inputFill,
+                          color:        AppColors.inputFill,
                           borderRadius: BorderRadius.circular(AppRadii.md),
-                          border: Border.all(color: AppColors.border),
+                          border:       Border.all(color: AppColors.border),
+                          image: _photoBase64 != null
+                              ? DecorationImage(
+                                  image: MemoryImage(base64Decode(_photoBase64!)),
+                                  fit:   BoxFit.cover,
+                                )
+                              : null,
                         ),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.all(12),
-                              decoration: BoxDecoration(
-                                color: AppColors.surface,
-                                borderRadius:
-                                    BorderRadius.circular(AppRadii.sm),
+                        child: _photoBase64 == null
+                            ? Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Container(
+                                    padding: const EdgeInsets.all(12),
+                                    decoration: BoxDecoration(
+                                      color: AppColors.surface,
+                                      borderRadius: BorderRadius.circular(AppRadii.sm),
+                                    ),
+                                    child: const Icon(Icons.add_a_photo_outlined,
+                                        color: AppColors.primary, size: 28),
+                                  ),
+                                  const SizedBox(height: 12),
+                                  Text('Tap to upload photos',
+                                      style: AppTextStyles.titleSmall
+                                          .copyWith(color: AppColors.textPrimary)),
+                                  const SizedBox(height: 8),
+                                  Text(
+                                    'Include clear shots of the damage or unit serial numbers',
+                                    style: AppTextStyles.bodySmall
+                                        .copyWith(color: AppColors.textMuted, fontSize: 12),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ],
+                              )
+                            : Stack(
+                                children: [
+                                  ClipRRect(
+                                    borderRadius: BorderRadius.circular(AppRadii.md),
+                                    child: Image.memory(
+                                      base64Decode(_photoBase64!),
+                                      width: double.infinity,
+                                      height: 160,
+                                      fit: BoxFit.cover,
+                                    ),
+                                  ),
+                                  Positioned(
+                                    top: 8, right: 8,
+                                    child: GestureDetector(
+                                      onTap: () => setState(() => _photoBase64 = null),
+                                      child: const CircleAvatar(
+                                        radius: 14,
+                                        backgroundColor: AppColors.danger,
+                                        child: Icon(Icons.close, color: Colors.white, size: 16),
+                                      ),
+                                    ),
+                                  ),
+                                ],
                               ),
-                              child: const Icon(
-                                Icons.add_a_photo_outlined,
-                                color: AppColors.primary,
-                                size: 28,
-                              ),
-                            ),
-                            const SizedBox(height: 2),
-                            Text(
-                              'Tap to upload photos',
-                              style: AppTextStyles.titleSmall.copyWith(
-                                color: AppColors.textPrimary,
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            Text(
-                              'Include clear shots of the damage or unit serial numbers',
-                              style: AppTextStyles.bodySmall.copyWith(
-                                color: AppColors.textMuted,
-                                fontSize: 12,
-                              ),
-                              textAlign: TextAlign.center,
-                            ),
-                          ],
-                        ),
                       ),
                     ),
                     const SizedBox(height: 38),
@@ -315,6 +343,7 @@ class _RequestSubmissionScreenState extends ConsumerState<RequestSubmissionScree
                         profession:  _profession,
                         location:    loc,
                         urgency:     _urgency.toLowerCase(),
+                        photoBase64: _photoBase64,
                       );
                     },
                     ),

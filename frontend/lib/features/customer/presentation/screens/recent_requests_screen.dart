@@ -10,11 +10,25 @@ import '../widgets/customer_bottom_nav_bar.dart';
 import '../widgets/delete_request_dialog.dart';
 import '../providers/service_request_notifier.dart';
 
-class RecentRequestsScreen extends ConsumerWidget {
+class RecentRequestsScreen extends ConsumerStatefulWidget {
   const RecentRequestsScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<RecentRequestsScreen> createState() => _RecentRequestsScreenState();
+}
+
+class _RecentRequestsScreenState extends ConsumerState<RecentRequestsScreen> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      ref.read(serviceRequestProvider.notifier).refreshRequests();
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final state = ref.watch(serviceRequestProvider);
 
     return Scaffold(
@@ -75,7 +89,7 @@ class RecentRequestsScreen extends ConsumerWidget {
               onTap: (index) {
                 switch (index) {
                   case 0: context.go(AppRoutes.customerDashboard); break;
-                  case 2: context.go(AppRoutes.customerProfessionalsList);  break;
+                  case 2: context.go(AppRoutes.professionalsList);  break;
                   case 3: context.go(AppRoutes.customerSettings);   break;
                 }
               },

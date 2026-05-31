@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -89,12 +91,7 @@ class JobDetailsScreen extends ConsumerWidget {
                           decoration: BoxDecoration(
                             color: AppColors.neutral,
                             borderRadius: BorderRadius.circular(AppRadii.sm),
-                          ),
-                          child: const Icon(
-                            Icons.person_outline_rounded,
-                            color: AppColors.primary,
-                            size: 22,
-                          ),
+                          ),  
                         ),
                       ],
                     ),
@@ -153,6 +150,14 @@ class JobDetailsScreen extends ConsumerWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
+                          Text('CUSTOMER NAME',
+                              style: AppTextStyles.labelMedium.copyWith(
+                                  color: AppColors.textMuted, fontSize: 10)
+                                    ),
+                          const SizedBox(height: 6),
+                            Text(request.customerName ?? 'Customer Name',
+                              style: AppTextStyles.titleSmall
+                                  .copyWith(color: AppColors.textPrimary)),
                            Text('PROFESSION',
                               style: AppTextStyles.labelMedium.copyWith(
                                   color: AppColors.textMuted, fontSize: 10)),
@@ -181,7 +186,7 @@ class JobDetailsScreen extends ConsumerWidget {
                     ),
                     const SizedBox(height: 24),
 
-                    // ── Description ────────────────────────
+                    //Description
                     Container(
                       decoration: const BoxDecoration(
                         border: Border(
@@ -203,6 +208,26 @@ class JobDetailsScreen extends ConsumerWidget {
                       ),
                     ),
                     const SizedBox(height: 24),
+                    // Replace the two placeholder boxes:
+                    if (request.photoBase64 != null && request.photoBase64!.isNotEmpty)
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(AppRadii.sm),
+                        child: Image.memory(
+                          base64Decode(request.photoBase64!),
+                          height: 180, width: double.infinity,
+                          fit: BoxFit.cover,
+                        ),
+                      )
+                    else
+                      Container(
+                        height: 120,
+                        decoration: BoxDecoration(
+                          color: AppColors.neutral,
+                          borderRadius: BorderRadius.circular(AppRadii.sm),
+                        ),
+                        child: const Center(child: Text('No photo attached',
+                            style: TextStyle(color: AppColors.textMuted))),
+                      ),
                   ],
                 ),
               ),

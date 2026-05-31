@@ -18,27 +18,39 @@ class EditRequestScreen extends ConsumerStatefulWidget {
 }
 
 class _EditRequestScreenState extends ConsumerState<EditRequestScreen> {
+  static const List<String> _professions = [
+    'General Handyman',
+    'Electrician',
+    'Plumber',
+    'Carpenter',
+    'Mechanic',
+    'Painter',
+    'Home Inspector',
+    'Home Organizer',
+    'HVAC Technician',
+    'Roofer',
+    'Flooring Specialist',
+    'Pool Technician',
+    'Pest Control Expert',
+    'Grass Cutter',
+    'Landscaper',
+    'General Contractor',
+    'Interior Designer',
+    'Architect',
+    'Structural Engineer',
+    'Other Home Pro',
+  ];
+
   final _titleController       = TextEditingController();
   final _locationController    = TextEditingController();
   final _descriptionController = TextEditingController();
-  String _profession = 'Civil Engineer';
+  String _profession = 'General Handyman';
+  bool _prefilled = false;
+  bool _requestedRefresh = false;
 
   @override
   void initState() {
     super.initState();
-    // Pre-fill with real data after first frame
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      final requests = ref.read(serviceRequestProvider).requests;
-      try {
-        final r = requests.firstWhere((r) => r.id == widget.requestId);
-        _titleController.text       = r.title;
-        _locationController.text    = r.location;
-        _descriptionController.text = r.description;
-        setState(() => _profession  = r.profession);
-      } catch (_) {
-        ref.read(serviceRequestProvider.notifier).refreshRequests();
-      }
-    });
   }
 
   @override
@@ -52,6 +64,31 @@ class _EditRequestScreenState extends ConsumerState<EditRequestScreen> {
   @override
   Widget build(BuildContext context) {
     final srState = ref.watch(serviceRequestProvider); 
+    final request = srState.requests.cast<dynamic>().firstWhere(
+          (r) => r?.id == widget.requestId,
+          orElse: () => null,
+        );
+
+    if (request != null && !_prefilled) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        _titleController.text = request.title;
+        _locationController.text = request.location;
+        _descriptionController.text = request.description;
+        setState(() {
+          _profession = _professions.contains(request.profession)
+              ? request.profession
+              : _professions.first;
+          _prefilled = true;
+        });
+      });
+    } else if (request == null && !srState.isLoading && !_requestedRefresh) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        _requestedRefresh = true;
+        ref.read(serviceRequestProvider.notifier).refreshRequests();
+      });
+    }
 
     ref.listen<ServiceRequestState>(serviceRequestProvider, (_, next) {
       if (next.error != null) {
@@ -118,17 +155,12 @@ class _EditRequestScreenState extends ConsumerState<EditRequestScreen> {
                         contentPadding: const EdgeInsets.symmetric(
                             horizontal: 16, vertical: 16),
                       ),
-                      items: const [
-                        DropdownMenuItem(
-                            value: 'Civil Engineer',
-                            child: Text('Civil Engineer')),
-                        DropdownMenuItem(
-                            value: 'Electrician', child: Text('Electrician')),
-                        DropdownMenuItem(
-                            value: 'Plumber', child: Text('Plumber')),
-                        DropdownMenuItem(
-                            value: 'Carpenter', child: Text('Carpenter')),
-                      ],
+                        items: _professions
+                          .map((profession) => DropdownMenuItem(
+                            value: profession,
+                            child: Text(profession),
+                            ))
+                          .toList(),
                       onChanged: (v) =>
                           setState(() => _profession = v ?? _profession),
                     ),

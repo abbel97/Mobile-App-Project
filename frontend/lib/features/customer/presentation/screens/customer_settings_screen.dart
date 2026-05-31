@@ -10,6 +10,7 @@ import '../../../../core/theme/app_text_styles.dart';
 import '../../../../features/shared/presentation/widgets/delete_account_dialog.dart';
 import '../../../../features/shared/presentation/widgets/logout_dialog.dart';
 import '../widgets/customer_bottom_nav_bar.dart';
+import '../../../../core/widgets/profile_image_picker.dart';
 
 class CustomerSettingsScreen extends ConsumerStatefulWidget {
   const CustomerSettingsScreen({super.key});
@@ -23,6 +24,7 @@ class _CustomerSettingsScreenState extends ConsumerState<CustomerSettingsScreen>
 
   @override
   Widget build(BuildContext context) {
+    final auth = ref.watch(authProvider);
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
@@ -54,25 +56,17 @@ class _CustomerSettingsScreenState extends ConsumerState<CustomerSettingsScreen>
                       ),
                       child: Row(
                         children: [
-                          Container(
-                            width: 84,
-                            height: 80,
-                            decoration: BoxDecoration(
-                              color: AppColors.neutral,
-                              borderRadius: BorderRadius.circular(2),
-                            ),
-                            child: const Icon(
-                              Icons.person_outline_rounded,
-                              size: 52,
-                              color: AppColors.textPrimary,
-                            ),
+                          profileImageWidget(
+                            base64Image: auth.user?.photoBase64,
+                            size: 80,
+                            round: true,
                           ),
                           const SizedBox(width: 18),
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                'Your Name',
+                                auth.user?.name ?? 'Your Name',
                                 style: AppTextStyles.titleSmall.copyWith(
                                   fontSize: 20,
                                   color: AppColors.primary,
@@ -80,7 +74,7 @@ class _CustomerSettingsScreenState extends ConsumerState<CustomerSettingsScreen>
                               ),
                               const SizedBox(height: 6),
                               Text(
-                                'youremail@gmail.com',
+                                auth.user?.email ?? 'youremail@gmail.com',
                                 style: AppTextStyles.bodySmall.copyWith(
                                   color: AppColors.textBody,
                                 ),
@@ -230,7 +224,7 @@ class _CustomerSettingsScreenState extends ConsumerState<CustomerSettingsScreen>
                     break;
                   case 1: context.push(AppRoutes.customerRequests);
                     break;
-                  case 2: context.push(AppRoutes.customerProfessionalsList);
+                  case 2: context.push(AppRoutes.professionalsList);
                     break;
                 }
               },

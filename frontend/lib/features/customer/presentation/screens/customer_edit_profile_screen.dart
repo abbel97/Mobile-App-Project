@@ -1,186 +1,168 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/theme/app_colors.dart';
-import '../../../../core/theme/app_radii.dart';
+//import '../../../../core/theme/app_radii.dart';
 import '../../../../core/theme/app_text_styles.dart';
+import '../../../../core/widgets/custom_textfield.dart';
 import '../../../../core/widgets/primary_button.dart';
+import '../../../../core/widgets/profile_image_picker.dart';
+import 'package:home_tweak/features/auth/presentation/providers/auth_notifier.dart';
 
-class CustomerEditProfileScreen extends StatelessWidget {
+class CustomerEditProfileScreen extends ConsumerStatefulWidget {
   const CustomerEditProfileScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(24, 8, 24, 24),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  IconButton(
-                    onPressed: () => context.pop(),
-                    icon: const Icon(
-                      Icons.arrow_back_rounded,
-                      color: AppColors.primary,
-                    ),
-                  ),
-                  Text(
-                    'Profile Information',
-                    style: AppTextStyles.titleMedium.copyWith(
-                      color: AppColors.primary,
-                      fontSize: 20,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 24),
-
-              Center(
-                child: Column(
-                  children: [
-                    Stack(
-                      clipBehavior: Clip.none,
-                      children: [
-                        Container(
-                          width: 112,
-                          height: 112,
-                          decoration: BoxDecoration(
-                            color: AppColors.neutral,
-                            borderRadius: BorderRadius.circular(AppRadii.sm),
-                          ),
-                          child: const Icon(
-                            Icons.person_outline_rounded,
-                            size: 72,
-                            color: AppColors.textPrimary,
-                          ),
-                        ),
-                        Positioned(
-                          right: -4,
-                          bottom: -4,
-                          child: Container(
-                            width: 28,
-                            height: 28,
-                            decoration: BoxDecoration(
-                              color: AppColors.surface,
-                              borderRadius: BorderRadius.circular(6),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withValues(alpha: 0.12),
-                                  blurRadius: 8,
-                                ),
-                              ],
-                            ),
-                            child: const Icon(
-                              Icons.photo_camera_outlined,
-                              size: 14,
-                              color: AppColors.primary,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 18),
-                    Text(
-                      'Your Name',
-                      style: AppTextStyles.titleMedium.copyWith(
-                        color: AppColors.textPrimary,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 26),
-
-              Container(
-                decoration: BoxDecoration(
-                  color: AppColors.surface,
-                  borderRadius: BorderRadius.circular(AppRadii.md),
-                  border: Border.all(
-                    color: AppColors.border.withValues(alpha: 0.5),
-                  ),
-                ),
-                child: const Column(
-                  children: [
-                    _ProfileField(
-                      label: 'FULL NAME',
-                      value: 'Your Name',
-                      icon: Icons.edit_outlined,
-                    ),
-                    Divider(height: 1, color: AppColors.border),
-                    _ProfileField(
-                      label: 'EMAIL ADDRESS',
-                      value: 'youremail@gmail.com',
-                      icon: Icons.edit_outlined,
-                    ),
-                    Divider(height: 1, color: AppColors.border),
-                    _ProfileField(
-                      label: 'PRIMARY LOCATION',
-                      value: '123 Bole Street',
-                      icon: Icons.place_outlined,
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 32),
-              PrimaryButton(
-                label: 'Save Changes',
-                height: 52,
-                onPressed: () {
-                  // TODO: handle save
-                },
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
+  ConsumerState<CustomerEditProfileScreen> createState() =>
+      _CustomerEditProfileScreenState();
 }
 
-class _ProfileField extends StatelessWidget {
-  const _ProfileField({
-    required this.label,
-    required this.value,
-    required this.icon,
-  });
+class _CustomerEditProfileScreenState
+    extends ConsumerState<CustomerEditProfileScreen> {
+  final _nameController     = TextEditingController();
+  final _emailController    = TextEditingController();
+  final _locationController = TextEditingController();
+  String? _photoBase64;
 
-  final String label;
-  final String value;
-  final IconData icon;
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final user = ref.read(authProvider).user;
+      if (user != null) {
+        _nameController.text     = user.name;
+        _emailController.text    = user.email;
+        _locationController.text = user.location ?? '';
+        setState(() => _photoBase64 = user.photoBase64);
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _emailController.dispose();
+    _locationController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
-      child: Row(
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  label,
-                  style: AppTextStyles.labelMedium.copyWith(
-                    color: AppColors.primary,
-                    fontSize: 12,
-                  ),
+    final auth = ref.watch(authProvider);
+
+    ref.listen<AuthState>(authProvider, (_, next) {
+      if (next.error != null) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Text(next.error!),
+            backgroundColor: AppColors.danger));
+        ref.read(authProvider.notifier).clearError();
+      }
+      if (next.isSuccess) {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+            content: Text('Profile updated'),
+            backgroundColor: AppColors.success));
+        ref.read(authProvider.notifier).clearSuccess();
+        context.pop();
+      }
+    });
+
+    return Scaffold(
+      backgroundColor: AppColors.background,
+      body: SafeArea(
+        child: Column(
+          children: [
+            Expanded(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.fromLTRB(24, 8, 24, 24),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        IconButton(
+                          onPressed: () => context.pop(),
+                          icon: const Icon(Icons.arrow_back_rounded,
+                              color: AppColors.primary),
+                        ),
+                        Text('Edit Profile',
+                            style: AppTextStyles.titleMedium
+                                .copyWith(color: AppColors.primary)),
+                      ],
+                    ),
+                    const SizedBox(height: 24),
+
+                    // ── Profile photo ────────────────────
+                    Center(
+                      child: ProfileImagePicker(
+                        base64Image: _photoBase64,
+                        size: 100, isRound: true,
+                        onPickImage: () async {
+                          final b64 = await pickImageAsBase64();
+                          if (b64 != null) setState(() => _photoBase64 = b64);
+                        },
+                      ),
+                    ),
+                    const SizedBox(height: 28),
+
+                    CustomTextField(
+                      label: 'FULL NAME',
+                      controller: _nameController,
+                    ),
+                    const SizedBox(height: 18),
+                    CustomTextField(
+                      label: 'EMAIL ADDRESS',
+                      controller: _emailController,
+                      keyboardType: TextInputType.emailAddress,
+                    ),
+                    const SizedBox(height: 18),
+                    CustomTextField(
+                      label: 'LOCATION',
+                      hintText: 'City, Country',
+                      controller: _locationController,
+                    ),
+                    const SizedBox(height: 32),
+                  ],
                 ),
-                const SizedBox(height: 10),
-                Text(
-                  value,
-                  style: AppTextStyles.bodyRegular.copyWith(
-                    color: AppColors.textPrimary,
-                  ),
-                ),
-              ],
+              ),
             ),
-          ),
-          Icon(icon, color: AppColors.textMuted, size: 18),
-        ],
+            Container(
+              padding: const EdgeInsets.fromLTRB(24, 12, 24, 16),
+              decoration: const BoxDecoration(
+                color: AppColors.surface,
+                border: Border(top: BorderSide(color: AppColors.border)),
+              ),
+              child: PrimaryButton(
+                label: 'Save Changes',
+                height: 52,
+                trailing: auth.isLoading
+                    ? const SizedBox(
+                        width: 18, height: 18,
+                        child: CircularProgressIndicator(
+                            color: Colors.white, strokeWidth: 2))
+                    : null,
+                onPressed: auth.isLoading
+                    ? null
+                    : () {
+                        final name  = _nameController.text.trim();
+                        final email = _emailController.text.trim();
+                        if (name.isEmpty || email.isEmpty) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                                content: Text('Name and email are required')));
+                          return;
+                        }
+                        ref.read(authProvider.notifier).updateProfile(
+                          name:        name,
+                          email:       email,
+                          location:    _locationController.text.trim(),
+                          photoBase64: _photoBase64,
+                        );
+                      },
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

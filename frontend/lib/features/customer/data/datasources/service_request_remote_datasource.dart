@@ -21,10 +21,12 @@ class ServiceRequestRemoteDataSource {
     required String profession,
     required String location,
     String urgency = 'regular',
+    String? photoBase64,
   }) async {
     final res = await ApiClient.post('/requests', {
       'title': title, 'description': description,
       'profession': profession, 'location': location, 'urgency': urgency,
+      if (photoBase64 != null) 'photo_base64': photoBase64,
     });
     if (res.statusCode == 201)
       return ServiceRequestModel.fromJson(jsonDecode(res.body) as Map<String, dynamic>);

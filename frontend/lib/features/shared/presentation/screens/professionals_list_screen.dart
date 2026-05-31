@@ -1,12 +1,17 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/routing/app_routes.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_radii.dart';
 import '../../../../core/theme/app_text_styles.dart';
+import '../../../auth/presentation/providers/auth_notifier.dart';
+import '../../../professional/presentation/providers/professional_notifier.dart';
 
-class ProfessionalsListScreen extends StatelessWidget {
+class ProfessionalsListScreen extends ConsumerStatefulWidget {
   final bool showCta;
   final Widget? bottomNavigationBar;
 
@@ -17,140 +22,140 @@ class ProfessionalsListScreen extends StatelessWidget {
   });
 
   @override
+  ConsumerState<ProfessionalsListScreen> createState() => _ProfessionalsListScreenState();
+}
+
+class _ProfessionalsListScreenState extends ConsumerState<ProfessionalsListScreen> {
+  final _searchController = TextEditingController();
+  String _searchQuery = '';
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      ref.read(professionalProvider.notifier).refreshProfessionals();
+    });
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final state = ref.watch(professionalProvider);
+    final auth = ref.watch(authProvider);
+    final filteredProfessionals = state.professionals.where((p) {
+      final query = _searchQuery.trim().toLowerCase();
+      if (query.isEmpty) return true;
+      return [p.name, p.profession, p.location ?? '']
+          .any((value) => value.toLowerCase().contains(query));
+    }).toList();
+
     return Scaffold(
       backgroundColor: AppColors.background,
-      bottomNavigationBar: bottomNavigationBar,
+      bottomNavigationBar: widget.bottomNavigationBar,
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.fromLTRB(24, 8, 24, 24),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-             
               Row(
                 children: [
                   Container(
-                    width: 20,
-                    height: 40,
+                    width: 44, height: 44,
                     decoration: BoxDecoration(
                       color: AppColors.neutral,
                       borderRadius: BorderRadius.circular(AppRadii.md),
                     ),
-                  ),
-                  Text(
-                    'Home-Tweak',
-                    style: AppTextStyles.titleMedium.copyWith(
-                      color: AppColors.primary,
+                    child: IconButton(
+                      onPressed: () => context.pop(),
+                      icon: const Icon(Icons.arrow_back_rounded,
+                          color: AppColors.primary),
                     ),
                   ),
+                  const SizedBox(width: 10),
+                  Text('Professionals',
+                      style: AppTextStyles.titleMedium
+                          .copyWith(color: AppColors.primary, fontSize: 18)),
                 ],
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 22),
 
-             TextField(
-              decoration: InputDecoration(
-                hintText: 'Search individuals...',
-                prefixIcon: const Icon(Icons.search_rounded),
-
-                filled: true,
-                fillColor: AppColors.surface,
-
-                border: OutlineInputBorder(
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                decoration: BoxDecoration(
+                  color: AppColors.surface,
                   borderRadius: BorderRadius.circular(AppRadii.md),
-                  borderSide: const BorderSide(
-                    color: AppColors.border,
-                  ),
+                  border: Border.all(color: AppColors.border),
                 ),
-              ),
-            ),
-              const SizedBox(height: 20),
-
-              SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
                 child: Row(
-                  children: const [
-                    _Pill(label: 'All Experts', selected: true),
-                    SizedBox(width: 12),
-                    _Pill(label: 'Plumbing'),
-                    SizedBox(width: 12),
-                    _Pill(label: 'Electrical'),
-                    SizedBox(width: 12),
-                    _Pill(label: 'Carpentry'),
-                    SizedBox(width: 12),
-                    _Pill(label: 'Painting'),
-                    SizedBox(width: 12),
-                    _Pill(label: 'Contractors'),
-                    SizedBox(width: 12),
-                    _Pill(label: 'Interior Designer'),
+                  children: [
+                    const Icon(Icons.search_rounded,
+                        color: AppColors.tertiary, size: 24),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: TextField(
+                        controller: _searchController,
+                        onChanged: (value) => setState(() => _searchQuery = value),
+                        decoration: InputDecoration(
+                          hintText: 'Search name, trade, or location',
+                          hintStyle: AppTextStyles.bodyRegular
+                              .copyWith(color: AppColors.textMuted),
+                          border: InputBorder.none,
+                          isDense: true,
+                          suffixIcon: _searchQuery.isEmpty
+                              ? null
+                              : IconButton(
+                                  onPressed: () {
+                                    _searchController.clear();
+                                    setState(() => _searchQuery = '');
+                                  },
+                                  icon: const Icon(Icons.close_rounded,
+                                      color: AppColors.textMuted, size: 18),
+                                ),
+                        ),
+                        style: AppTextStyles.bodyRegular
+                            .copyWith(color: AppColors.textPrimary),
+                      ),
+                    ),
                   ],
                 ),
               ),
-              const SizedBox(height: 26),
+              const SizedBox(height: 22),
 
-              _ProfessionalCard(
-                name: 'Elphaz Jovani',
-                title: 'Carpenter',
-                experience: '12 years experience',
-                onTap: () => context.push(
-                  AppRoutes.professionalProfileDetailPath('elphaz-jovani'),
-                ),
-              ),
-              _ProfessionalCard(
-                name: 'Michael Ash',
-                title: 'Interior Designer',
-                experience: '8 years experience',
-                onTap: () => context.push(
-                  AppRoutes.professionalProfileDetailPath('michael-ash'),
-                ),
-              ),
-              _ProfessionalCard(
-                name: 'David James',
-                title: 'Plumber',
-                experience: '15 years experience',
-                onTap: () => context.push(
-                  AppRoutes.professionalProfileDetailPath('david-james'),
-                ),
-              ),
-              _ProfessionalCard(
-                name: 'Abebe Kebedee',
-                title: 'Custom Cabinetry & Carpentry',
-                experience: '6 years experience',
-                hasPhoto: false,
-                onTap: () => context.push(
-                  AppRoutes.professionalProfileDetailPath('abebe-kebedee'),
-                ),
-              ),
-              const SizedBox(height: 8),
+              if (state.isLoading && state.professionals.isEmpty)
+                const Center(child: CircularProgressIndicator())
+              else if (filteredProfessionals.isEmpty)
+                Center(
+                  child: Text(
+                    _searchQuery.trim().isEmpty
+                        ? 'No professionals registered yet'
+                        : 'No professionals match your search',
+                    style: AppTextStyles.bodyMedium
+                        .copyWith(color: AppColors.textMuted),
+                  ),
+                )
+              else
+                ...filteredProfessionals.map((p) => _ProfessionalCard(
+                      name: p.name,
+                      title: p.profession,
+                      experience: '${p.experienceYears} years experience',
+                      photoBase64: p.photoBase64,
+                      onTap: () => context.push(
+                          AppRoutes.professionalProfileDetailPath(p.id)),
+                    )),
 
-              // ── CTA promo — customer side only ───────────
-              if (showCta) const _SupportPromo(),
+              if (widget.showCta && auth.isCustomer) ...[
+                const SizedBox(height: 8),
+                const _SupportPromo(),
+              ],
             ],
           ),
-        ),
-      ),
-    );
-  }
-}
-
-class _Pill extends StatelessWidget {
-  const _Pill({required this.label, this.selected = false});
-  final String label;
-  final bool selected;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
-      decoration: BoxDecoration(
-        color: selected ? AppColors.primary : AppColors.card,
-        borderRadius: BorderRadius.circular(AppRadii.sm),
-      ),
-      child: Text(
-        label,
-        style: AppTextStyles.titleSmall.copyWith(
-          fontSize: 14,
-          color: selected ? AppColors.surface : AppColors.textBody,
         ),
       ),
     );
@@ -162,15 +167,15 @@ class _ProfessionalCard extends StatelessWidget {
     required this.name,
     required this.title,
     required this.experience,
+    required this.photoBase64,
     required this.onTap,
-    this.hasPhoto = true,
   });
 
-  final String name;
-  final String title;
-  final String experience;
+  final String       name;
+  final String       title;
+  final String       experience;
+  final String?      photoBase64;
   final VoidCallback onTap;
-  final bool hasPhoto;
 
   @override
   Widget build(BuildContext context) {
@@ -179,7 +184,7 @@ class _ProfessionalCard extends StatelessWidget {
       borderRadius: BorderRadius.circular(AppRadii.md),
       child: Container(
         margin: const EdgeInsets.only(bottom: 12),
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(18),
         decoration: BoxDecoration(
           color: AppColors.card,
           borderRadius: BorderRadius.circular(AppRadii.md),
@@ -187,61 +192,43 @@ class _ProfessionalCard extends StatelessWidget {
         child: Row(
           children: [
             Container(
-              width: 70,
-              height: 70,
+              width: 72,
+              height: 72,
               decoration: BoxDecoration(
-                color: hasPhoto
-                    ? const Color.fromARGB(255, 28, 37, 48)
-                    : AppColors.surface,
+                color: const Color(0xFF1F2937),
                 borderRadius: BorderRadius.circular(AppRadii.md),
-                border: Border.all(color: AppColors.border),
+                image: (photoBase64 != null && photoBase64!.isNotEmpty)
+                    ? DecorationImage(
+                        image: MemoryImage(base64Decode(photoBase64!)),
+                        fit: BoxFit.cover,
+                      )
+                    : null,
               ),
-              child: hasPhoto
-                  ? const Icon(Icons.person, color: AppColors.surface, size: 38)
-                  : const SizedBox.shrink(),
+              child: (photoBase64 != null && photoBase64!.isNotEmpty)
+                  ? null
+                  : const Icon(Icons.person, color: AppColors.surface, size: 42),
             ),
             const SizedBox(width: 18),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    name,
-                    style: AppTextStyles.titleSmall.copyWith(
-                      fontSize: 18,
-                      color: AppColors.primary,
-                    ),
-                  ),
+                  Text(name,
+                      style: AppTextStyles.titleSmall.copyWith(
+                          fontSize: 18, color: AppColors.primary)),
                   const SizedBox(height: 4),
-                  Text(
-                    title,
-                    style: AppTextStyles.titleSmall.copyWith(
-                      fontSize: 14,
-                      color: AppColors.secondary,
-                    ),
-                  ),
+                  Text(title,
+                      style: AppTextStyles.titleSmall.copyWith(
+                          fontSize: 14, color: AppColors.secondary)),
                   const SizedBox(height: 4),
-                  Text(
-                    experience,
-                    style: AppTextStyles.bodyRegular.copyWith(
-                      fontSize: 13,
-                      color: AppColors.textBody,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Row(
-                    children: [
-                      const SizedBox(width: 4),
-                    ],
-                  ),
+                  Text(experience,
+                      style: AppTextStyles.bodyRegular.copyWith(
+                          fontSize: 13, color: AppColors.textBody)),
                 ],
               ),
             ),
-            const Icon(
-              Icons.chevron_right_rounded,
-              color: AppColors.tertiary,
-              size: 28,
-            ),
+            const Icon(Icons.chevron_right_rounded,
+                color: AppColors.tertiary, size: 28),
           ],
         ),
       ),
@@ -249,7 +236,8 @@ class _ProfessionalCard extends StatelessWidget {
   }
 }
 
-class _SupportPromo extends StatelessWidget {
+
+class _SupportPromo extends StatelessWidget {  
   const _SupportPromo();
 
   @override
@@ -263,39 +251,31 @@ class _SupportPromo extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            "Can't find the right\nexpert?",
-            style: AppTextStyles.titleLarge.copyWith(
-              color: AppColors.neutral.withValues(alpha: 0.9),
-            ),
-          ),
+          Text("Can't find the right\nexpert?",
+              style: AppTextStyles.titleLarge.copyWith(
+                  color: AppColors.neutral.withValues(alpha: 0.9))),
           const SizedBox(height: 18),
           Text(
-            "Tell us about your project and we'll match you with the best available professional in our network.",
+            "Tell us about your project and we'll match you with the best available professional.",
             style: AppTextStyles.bodySmall.copyWith(
-              color: AppColors.neutral.withValues(alpha: 0.6),
-            ),
+                color: AppColors.neutral.withValues(alpha: 0.6)),
           ),
           const SizedBox(height: 24),
           SizedBox(
-            width: double.infinity,
-            height: 52,
+            width: double.infinity, height: 52,
             child: ElevatedButton(
-              onPressed: () {},
+              onPressed: () => context.push(AppRoutes.customerRequestSubmit),
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.surface,
                 foregroundColor: AppColors.primary,
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(AppRadii.md),
-                ),
+                    borderRadius: BorderRadius.circular(AppRadii.md)),
                 elevation: 0,
               ),
-              child:
-               Text(
+              child: Text(
                 'Submit your issue',
-                style: AppTextStyles.titleSmall.copyWith(
-                  color: AppColors.primary,
-                ),
+                style: AppTextStyles.titleSmall
+                    .copyWith(color: AppColors.primary),
               ),
             ),
           ),

@@ -10,11 +10,25 @@ import '../widgets/green_buttons.dart';
 import '../widgets/professional_bottom_nav_bar.dart';
 import '../../../customer/presentation/providers/service_request_notifier.dart';
 
-class JobsScreen extends ConsumerWidget {
+class JobsScreen extends ConsumerStatefulWidget {
   const JobsScreen({super.key});
 
   @override
-    Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<JobsScreen> createState() => _JobsScreenState();
+}
+
+class _JobsScreenState extends ConsumerState<JobsScreen> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      ref.read(serviceRequestProvider.notifier).refreshRequests();
+    });
+  }
+
+  @override
+    Widget build(BuildContext context) {
       final state = ref.watch(serviceRequestProvider);
       final pending = state.requests.where((r) => r.isPending).toList();
    
@@ -164,13 +178,15 @@ class _JobCard extends StatelessWidget {
           const SizedBox(height: 10),
           Text(
             description,
+            maxLines: 3,
+            overflow: TextOverflow.ellipsis,
             style: AppTextStyles.bodySmall.copyWith(
               fontSize: 14,
               color: AppColors.textBody,
             ),
           ),
           const SizedBox(height: 22),
-          GreenButton(label: 'Apply', onPressed: onAccept),
+          GreenButton(label: 'View Details', onPressed: onAccept),
         ],
       ),
     );

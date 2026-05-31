@@ -10,11 +10,25 @@ import '../../../auth/presentation/providers/auth_notifier.dart';
 import '../providers/service_request_notifier.dart';
 import '../widgets/customer_bottom_nav_bar.dart';
 
-class CustomerDashboardScreen extends ConsumerWidget {
+class CustomerDashboardScreen extends ConsumerStatefulWidget {
   const CustomerDashboardScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<CustomerDashboardScreen> createState() => _CustomerDashboardScreenState();
+}
+
+class _CustomerDashboardScreenState extends ConsumerState<CustomerDashboardScreen> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      ref.read(serviceRequestProvider.notifier).refreshRequests();
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final auth = ref.watch(authProvider);
     final recentRequests = ref.watch(serviceRequestProvider).requests.take(2).toList();
     final firstName = _firstName(auth.user?.name);
@@ -119,7 +133,7 @@ class CustomerDashboardScreen extends ConsumerWidget {
                     context.push(AppRoutes.customerRequests);
                     break;
                   case 2:
-                    context.push(AppRoutes.customerProfessionalsList);
+                    context.push(AppRoutes.professionalsList);
                     break;
                   case 3:
                     context.push(AppRoutes.customerSettings);
