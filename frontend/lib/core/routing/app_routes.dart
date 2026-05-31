@@ -11,16 +11,16 @@ class AppRoutes {
 	static const changePassword = '/auth/change-password';
 
 	static const customerDashboard = '/customer/dashboard';
-  static const customerRequestSubmit = '/customer/request-submission';
+    static const customerRequestSubmit = '/customer/request-submission';
 	static const customerRequests = '/customer/requests';
-	static const customerRequestEdit = '/customer/request-edit';
+	static const customerRequestEdit = '/customer/request-edit/:requestId';
 	static const customerProfileEdit = '/customer/profile-edit';
 	static const customerSettings = '/customer/settings';
 
 	static const professionalDashboard = '/professional/dashboard';
 	static const jobs = '/professional/jobs';
 	static const acceptedJobs = '/professional/accepted-jobs';
-	static const jobDetails = '/professional/job-details';
+	static const jobDetails = '/professional/jobs/:jobId';
 	static const professionalProfileEdit = '/professional/profile-edit';
 	static const professionalSettings = '/professional/settings';
 
@@ -29,18 +29,12 @@ class AppRoutes {
 	static const notifications = '/notifications';
 	static const termsAndPolicy = '/terms-policy';
 
-  static const customerProfessionalsList =
-    '/customer/professionals';
-
-static const professionalProfessionalsList =
-    '/professional/professionals';
-
   static String jobDetailsPath(String jobId) =>
       '/professional/jobs/$jobId';
 
   static String professionalProfileDetailPath(String professionalId) =>
       '/professionals/$professionalId';
 
-  static String customerRequestEditPath(String s) =>
-     '/customer/widgets';
+  static String customerRequestEditPath(String requestId) =>
+     '/customer/request-edit/$requestId';
 }

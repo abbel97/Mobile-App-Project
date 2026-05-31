@@ -28,7 +28,7 @@ import '../../features/shared/presentation/screens/terms_and_policy_screen.dart'
 import '../../features/splash/presentation/screens/splash_screen.dart';
 import 'app_routes.dart';
 
-// Bridges Riverpod state to GoRouter's ChangeNotifier listener
+
 class _AuthListenable extends ChangeNotifier {
   _AuthListenable(Ref ref) {
     ref.listen<AuthState>(authProvider, (context, state) => notifyListeners());
@@ -42,17 +42,17 @@ final routerProvider = Provider<GoRouter>((ref) {
     redirect: (context, state) {
       final auth = ref.read(authProvider);
       final location = state.uri.toString();
+      
       const customerPrefix = '/customer/';
       const professionalPrefix = '/professional/';
 
-      // Still loading persisted user — let splash handle it
+    
       if (location == AppRoutes.splash) return null;
 
       final isAuth   = auth.isAuthenticated;
       final isCust   = auth.isCustomer;
       final isProf   = auth.isProfessional;
 
-      // Unauthenticated trying to reach protected routes
       if (!isAuth &&
           (location.startsWith(customerPrefix) ||
            location.startsWith(professionalPrefix) ||
@@ -61,8 +61,7 @@ final routerProvider = Provider<GoRouter>((ref) {
       }
 
       // Role-based authorization
-      if (isAuth && isCust &&
-          (location.startsWith(professionalPrefix) || location.startsWith('/professionals'))) {
+      if (isAuth && isCust && location.startsWith(professionalPrefix)) {
         return AppRoutes.customerDashboard;
       }
       if (isAuth && isProf && location.startsWith(customerPrefix)) {
@@ -104,8 +103,7 @@ final routerProvider = Provider<GoRouter>((ref) {
           builder: (context, state) => const RequestSubmissionScreen()),
       GoRoute(path: AppRoutes.customerRequests,
           builder: (context, state) => const RecentRequestsScreen()),
-        GoRoute(path: AppRoutes.customerProfessionalsList,
-          builder: (context, state) => const ProfessionalsListScreen()),
+       
       GoRoute(
         path: AppRoutes.customerRequestEdit,
         builder: (context, state) => EditRequestScreen(
