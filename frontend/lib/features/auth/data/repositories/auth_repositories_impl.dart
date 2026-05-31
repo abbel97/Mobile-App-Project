@@ -33,10 +33,12 @@ class AuthRepositoryImpl implements AuthRepository {
     required String email,
     required String password,
     required String confirmPassword,
+    bool persistSession = true,
   }) async {
     final user = await _remote.registerCustomer(
       name: name, email: email, password: password, confirmPassword: confirmPassword,
     );
+    if (!persistSession) return user;
     return _saveAndReturn(user);
   }
 
@@ -51,13 +53,17 @@ class AuthRepositoryImpl implements AuthRepository {
     int? experienceYears,
     double? serviceRate,
     String? educationLevel,
+    String? photoBase64,
+    bool persistSession = true,
   }) async {
     final user = await _remote.registerProfessional(
       name: name, email: email, password: password,
       profession: profession, bio: bio, location: location,
       experienceYears: experienceYears, serviceRate: serviceRate,
       educationLevel: educationLevel,
+      photoBase64: photoBase64,
     );
+    if (!persistSession) return user;
     return _saveAndReturn(user);
   }
 
@@ -74,10 +80,38 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<void> changePassword({
     required String currentPassword,
     required String newPassword,
+    required String confirmNewPassword,
   }) => _remote.changePassword(
         currentPassword: currentPassword,
         newPassword: newPassword,
+        confirmNewPassword: confirmNewPassword,
       );
+    
+  Future<void> resetPassword({
+    required String email,
+    required String newPassword,
+    required String confirmPassword,
+  }) =>
+      _remote.resetPassword(
+        email: email,
+        newPassword: newPassword,
+        confirmPassword: confirmPassword,
+      );
+
+  @override
+  Future<UserEntity> updateProfile({
+    required String name,
+    required String email,
+    String? location,
+    String? photoBase64,
+  }) async {
+    final user = await _remote.updateProfile(
+      name: name, email: email,
+      location: location, photoBase64: photoBase64,
+    );
+    await _local.saveUser(user);
+    return user;
+  }
 
   @override
   Future<UserEntity?> getCurrentUser() => _local.getUser();

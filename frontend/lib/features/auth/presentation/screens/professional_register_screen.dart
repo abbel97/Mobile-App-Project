@@ -12,6 +12,7 @@ import '../../../../core/widgets/custom_textfield.dart';
 import '../../../../core/widgets/primary_button.dart';
 import '../../../../core/widgets/top_bar.dart';
 import '../providers/auth_notifier.dart';
+import '../../../../core/widgets/profile_image_picker.dart';
 
 class ProfessionalRegisterScreen extends ConsumerStatefulWidget {
   const ProfessionalRegisterScreen({super.key});
@@ -32,6 +33,7 @@ class _ProfessionalRegisterScreenState
   String? _selectedProfession;
   String? _selectedEducation;
   bool _agreedToTerms = false;
+  String? _photoBase64;
 
   final List<String> _professions = [
     'General Handyman',
@@ -149,39 +151,40 @@ class _ProfessionalRegisterScreenState
               ),
               const SizedBox(height: 12),
               Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  Container(
-                    width: 72,
-                    height: 72,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: AppColors.inputFill,
-                      border: Border.all(color: AppColors.border, width: 1.5),
-                    ),
-                    child: const Icon(
-                      Icons.camera_alt_outlined,
-                      color: AppColors.tertiary,
-                      size: 26,
-                    ),
+                  ProfileImagePicker(
+                    base64Image: _photoBase64,
+                    size: 80,
+                    isRound: true,
+                    onPickImage: () async {
+                      final b64 = await pickImageAsBase64();
+                      if (b64 != null) setState(() => _photoBase64 = b64);
+                    },
                   ),
                   const SizedBox(width: 16),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Upload a professional\nheadshot.',
-                        style: AppTextStyles.bodySmall.copyWith(color: AppColors.textBody),
-                      ),
-                      const SizedBox(height: 6),
-                      GestureDetector(
-                        // TODO: we'll implement file picker
-                        onTap: () {},
-                        child: Text(
-                          'Choose File',
-                          style: AppTextStyles.titleSmall.copyWith(color: AppColors.primary),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Upload a professional headshot.',
+                          style: AppTextStyles.bodySmall.copyWith(color: AppColors.textBody),
                         ),
-                      ),
-                    ],
+                        const SizedBox(height: 6),
+                        GestureDetector(
+                          onTap: () async {
+                            final b64 = await pickImageAsBase64();
+                            if (b64 != null) setState(() => _photoBase64 = b64);
+                          },
+                          child: Text(
+                            _photoBase64 == null ? 'Choose File' : 'Change Photo',
+                            style: AppTextStyles.titleSmall
+                                .copyWith(color: AppColors.primary),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ],
               ),
@@ -367,8 +370,8 @@ class _ProfessionalRegisterScreenState
                       width: 18, height: 18,
                       child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
                   : null,
-              onPressed: auth.isLoading ? null : () {
-                ref.read(authProvider.notifier).registerProfessional(
+              onPressed: auth.isLoading ? null : () async {
+                final success = await ref.read(authProvider.notifier).registerProfessional(
                   name:            _nameController.text.trim(),
                   email:           _emailController.text.trim(),
                   password:        _passwordController.text,
@@ -376,7 +379,14 @@ class _ProfessionalRegisterScreenState
                   bio:             _bioController.text,
                   educationLevel:  _selectedEducation,
                   experienceYears: int.tryParse(_experienceController.text),
+                  photoBase64:    _photoBase64,
                 );
+                if (!context.mounted || !success) return;
+                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                  content: Text('Registered successfully, login now'),
+                  backgroundColor: AppColors.success,
+                ));
+                context.go(AppRoutes.login);
               },
             ),
               const SizedBox(height: 20),

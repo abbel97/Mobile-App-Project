@@ -11,6 +11,7 @@ abstract class AuthRepository {
     required String email,
     required String password,
     required String confirmPassword,
+    bool persistSession = true,
   });
 
   Future<UserEntity> registerProfessional({
@@ -23,6 +24,7 @@ abstract class AuthRepository {
     int? experienceYears,
     double? serviceRate,
     String? educationLevel,
+    bool persistSession = true,
   });
 
   Future<void> logout();
@@ -30,6 +32,13 @@ abstract class AuthRepository {
   Future<void> changePassword({
     required String currentPassword,
     required String newPassword,
+    required String confirmNewPassword,
+  });
+  Future<UserEntity> updateProfile({
+    required String name,
+    required String email,
+    String? location,
+    String? photoBase64,
   });
   Future<UserEntity?> getCurrentUser();
 }

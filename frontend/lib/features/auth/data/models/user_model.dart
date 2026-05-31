@@ -8,6 +8,8 @@ class UserModel extends UserEntity {
     required super.name,
     required super.email,
     required super.role,
+    super.location,
+    super.photoBase64,
     required super.createdAt,
     this.token,
   });
@@ -18,6 +20,8 @@ class UserModel extends UserEntity {
       name:      json['name']       as String,
       email:     json['email']      as String,
       role:      json['role']       as String,
+      location:  json['location']   as String?,
+      photoBase64: json['photo_base64'] as String?,
       createdAt: json['created_at'] as String,
       token:     token,
     );
@@ -29,6 +33,8 @@ class UserModel extends UserEntity {
       name:      map['name']       as String,
       email:     map['email']      as String,
       role:      map['role']       as String,
+      location:  map['location']   as String?,
+      photoBase64: map['photo_base64'] as String?,
       createdAt: map['created_at'] as String,
       token:     map['token']      as String?,
     );
@@ -39,6 +45,8 @@ class UserModel extends UserEntity {
     'name':       name,
     'email':      email,
     'role':       role,
+    'location':   location,
+    'photo_base64': photoBase64,
     'token':      token,
     'created_at': createdAt,
   };

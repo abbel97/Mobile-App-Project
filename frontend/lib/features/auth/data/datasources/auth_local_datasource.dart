@@ -34,5 +34,7 @@ class AuthLocalDataSource {
     await prefs.remove(_tokenKey);
     final db = await AppDatabase.database;
     await db.delete('users');
+    await db.delete('service_requests');
+    await db.delete('professionals');
   }
 }

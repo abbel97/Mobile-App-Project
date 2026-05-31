@@ -126,6 +126,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     ),
                     const SizedBox(height: 10),
                     CustomTextField(
+                      controller: _passController,
                       hintText: '••••••••',
                       obscureText: true,
                     ),

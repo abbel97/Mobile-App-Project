@@ -3,18 +3,20 @@ import '../../data/repositories/auth_repositories_impl.dart';
 import '../../domain/entities/user_entity.dart';
 import '../../../../core/errors/failure.dart';
 
-//State 
+ 
 class AuthState {
   final UserEntity? user;
   final bool isLoading;
   final String? error;
   final bool isInitialized;
+  final bool isSuccess;
 
   const AuthState({
     this.user, 
     this.isLoading = false, 
     this.error, 
-    this.isInitialized = false
+    this.isInitialized = false,
+    this.isSuccess = false,
   });
 
   bool get isAuthenticated  => user != null;
@@ -26,18 +28,21 @@ class AuthState {
     bool? isLoading,
     String? error,
     bool? isInitialized,
+    bool? isSuccess,
     bool clearUser  = false,
     bool clearError = false,
+    bool clearSuccess = false,
   }) =>
       AuthState(
         user:      clearUser  ? null : user ?? this.user,
         isLoading: isLoading ?? this.isLoading,
         error:     clearError ? null : error ?? this.error,
         isInitialized: isInitialized ?? this.isInitialized,
+        isSuccess: clearSuccess ? false : isSuccess ?? this.isSuccess,
       );
+    
 }
 
-// Notifier
 class AuthNotifier extends StateNotifier<AuthState> {
   final AuthRepositoryImpl _repo;
 
@@ -64,8 +69,11 @@ class AuthNotifier extends StateNotifier<AuthState> {
       state = state.copyWith(isLoading: false, error: 'Something went wrong');
     }
   }
+  
+void clearError()   => state = state.copyWith(clearError: true);
+void clearSuccess() => state = state.copyWith(clearSuccess: true);
 
-  Future<void> registerCustomer({
+  Future<bool> registerCustomer({
     required String name,
     required String email,
     required String password,
@@ -75,16 +83,21 @@ class AuthNotifier extends StateNotifier<AuthState> {
     try {
       final user = await _repo.registerCustomer(
         name: name, email: email, password: password, confirmPassword: confirmPassword,
+        persistSession: false,
       );
-      state = state.copyWith(user: user, isLoading: false);
+      await _repo.logout();
+      state = state.copyWith(clearUser: true, isLoading: false);
+      // ignore: unnecessary_null_comparison
+      return user != null;
     } on Failure catch (e) {
       state = state.copyWith(isLoading: false, error: e.message);
     } catch (_) {
       state = state.copyWith(isLoading: false, error: 'Something went wrong');
     }
+    return false;
   }
 
-  Future<void> registerProfessional({
+  Future<bool> registerProfessional({
     required String name,
     required String email,
     required String password,
@@ -94,6 +107,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
     int? experienceYears,
     double? serviceRate,
     String? educationLevel,
+    String? photoBase64,
   }) async {
     state = state.copyWith(isLoading: true, clearError: true);
     try {
@@ -102,13 +116,19 @@ class AuthNotifier extends StateNotifier<AuthState> {
         profession: profession, bio: bio, location: location,
         experienceYears: experienceYears, serviceRate: serviceRate,
         educationLevel: educationLevel,
+        photoBase64: photoBase64,
+        persistSession: false,
       );
-      state = state.copyWith(user: user, isLoading: false);
+      await _repo.logout();
+      state = state.copyWith(clearUser: true, isLoading: false);
+      // ignore: unnecessary_null_comparison
+      return user != null;
     } on Failure catch (e) {
       state = state.copyWith(isLoading: false, error: e.message);
     } catch (_) {
       state = state.copyWith(isLoading: false, error: 'Something went wrong');
     }
+    return false;
   }
 
   Future<void> logout() async {
@@ -131,12 +151,14 @@ class AuthNotifier extends StateNotifier<AuthState> {
   Future<void> changePassword({
     required String currentPassword,
     required String newPassword,
+    required String confirmNewPassword,
   }) async {
     state = state.copyWith(isLoading: true, clearError: true);
     try {
       await _repo.changePassword(
         currentPassword: currentPassword,
         newPassword: newPassword,
+        confirmNewPassword: confirmNewPassword,
       );
       state = state.copyWith(isLoading: false);
     } on Failure catch (e) {
@@ -146,7 +168,25 @@ class AuthNotifier extends StateNotifier<AuthState> {
     }
   }
 
-  void clearError() => state = state.copyWith(clearError: true);
+Future<void> updateProfile({
+  required String name,
+  required String email,
+  String? location,
+  String? photoBase64,
+}) async {
+  state = state.copyWith(isLoading: true, clearError: true);
+  try {
+    final user = await _repo.updateProfile(
+      name: name, email: email,
+      location: location, photoBase64: photoBase64,
+    );
+    state = state.copyWith(user: user, isLoading: false, isSuccess: true);
+  } on Failure catch (e) {
+    state = state.copyWith(isLoading: false, error: e.message);
+  } catch (_) {
+    state = state.copyWith(isLoading: false, error: 'Failed to update profile');
+  } 
+ }
 }
 
 //Providers 
@@ -157,3 +197,4 @@ final authRepositoryProvider = Provider<AuthRepositoryImpl>(
 final authProvider = StateNotifierProvider<AuthNotifier, AuthState>((ref) {
   return AuthNotifier(ref.read(authRepositoryProvider));
 });
+

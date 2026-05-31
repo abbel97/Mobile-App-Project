@@ -122,9 +122,27 @@ class _ChangePasswordScreenState extends ConsumerState<ChangePasswordScreen> {
                       child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
                   : null,
               onPressed: auth.isLoading ? null : () {
+                final currentPassword = _currentPasswordController.text;
+                final newPassword = _newPasswordController.text;
+                final confirmPassword = _confirmPasswordController.text;
+                if (currentPassword.isEmpty || newPassword.isEmpty || confirmPassword.isEmpty) {
+                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                    content: Text('All password fields are required'),
+                    backgroundColor: AppColors.danger,
+                  ));
+                  return;
+                }
+                if (newPassword != confirmPassword) {
+                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                    content: Text('New passwords do not match'),
+                    backgroundColor: AppColors.danger,
+                  ));
+                  return;
+                }
                 ref.read(authProvider.notifier).changePassword(
-                  currentPassword: _currentPasswordController.text,
-                  newPassword:     _newPasswordController.text,
+                  currentPassword: currentPassword,
+                  newPassword: newPassword,
+                  confirmNewPassword: confirmPassword,
                 );
               },
             ),

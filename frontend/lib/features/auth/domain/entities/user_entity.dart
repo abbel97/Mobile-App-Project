@@ -5,6 +5,8 @@ class UserEntity extends Equatable {
   final String name;
   final String email;
   final String role;
+  final String? location;
+  final String? photoBase64;
   final String createdAt;
 
   const UserEntity({
@@ -12,6 +14,8 @@ class UserEntity extends Equatable {
     required this.name,
     required this.email,
     required this.role,
+    this.location,
+    this.photoBase64,
     required this.createdAt,
   });
 

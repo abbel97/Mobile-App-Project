@@ -36,7 +36,7 @@ class _CustomerRegisterScreenState
     super.dispose();
   }
 
-  void _register() {
+  Future<void> _register() async {
     final name     = _nameController.text.trim();
     final email    = _emailController.text.trim();
     final password = _passController.text;
@@ -51,9 +51,15 @@ class _CustomerRegisterScreenState
         const SnackBar(content: Text('Passwords do not match')));
       return;
     }
-    ref.read(authProvider.notifier).registerCustomer(
+    final success = await ref.read(authProvider.notifier).registerCustomer(
       name: name, email: email, password: password, confirmPassword: confirmPassword
     );
+    if (!mounted || !success) return;
+    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+      content: Text('Registered successfully, login now'),
+      backgroundColor: AppColors.success,
+    ));
+    context.go(AppRoutes.login);
   }
 
   @override
