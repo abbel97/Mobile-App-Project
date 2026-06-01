@@ -4,7 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class ApiClient {
   // Android emulator -> 10.0.2.2, iOS simulator/chrome -> localhost, physical device -> local network IP
-  static const String _base = 'http://192.168.1.5:3000/api';
+  static const String _base = 'http://10.0.2.2:3000/api';
 
   static Future<String?> _token() async {
     final prefs = await SharedPreferences.getInstance();
@@ -20,8 +20,14 @@ class ApiClient {
     return h;
   }
 
-  static Future<http.Response> get(String path) async =>
-      http.get(Uri.parse('$_base$path'), headers: await _headers());
+  static Future<http.Response> get(
+    String path, {
+    bool auth = true,
+  }) async =>
+      http.get(Uri.parse('$_base$path'), headers: await _headers(auth: auth));
+
+  static Future<http.Response> getRequest(String path) async =>
+      get(path);
 
   static Future<http.Response> post(
     String path,
