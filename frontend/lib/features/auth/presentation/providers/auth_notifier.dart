@@ -101,6 +101,7 @@ void clearSuccess() => state = state.copyWith(clearSuccess: true);
     required String name,
     required String email,
     required String password,
+    required String confirmPassword,
     required String profession,
     String? bio,
     String? location,
@@ -112,7 +113,7 @@ void clearSuccess() => state = state.copyWith(clearSuccess: true);
     state = state.copyWith(isLoading: true, clearError: true);
     try {
       final user = await _repo.registerProfessional(
-        name: name, email: email, password: password,
+        name: name, email: email, password: password, confirmPassword: confirmPassword,
         profession: profession, bio: bio, location: location,
         experienceYears: experienceYears, serviceRate: serviceRate,
         educationLevel: educationLevel,

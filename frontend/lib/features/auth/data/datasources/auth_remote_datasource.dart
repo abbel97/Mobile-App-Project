@@ -52,6 +52,7 @@ class AuthRemoteDataSource {
     required String name,
     required String email,
     required String password,
+    required String confirmPassword,
     required String profession,
     String? bio,
     String? location,
@@ -102,6 +103,9 @@ class AuthRemoteDataSource {
       'newPassword':     newPassword,
       'confirmNewPassword': confirmNewPassword,
     });
+    if (res.statusCode == 401) {
+      throw const WrongPasswordFailure();
+    }
     if (res.statusCode != 200) {
       final body = jsonDecode(res.body) as Map<String, dynamic>;
       throw ServerFailure(body['message'] as String? ?? 'Failed to change password');

@@ -47,6 +47,7 @@ class AuthRepositoryImpl implements AuthRepository {
     required String name,
     required String email,
     required String password,
+    required String confirmPassword,
     required String profession,
     String? bio,
     String? location,
@@ -57,7 +58,7 @@ class AuthRepositoryImpl implements AuthRepository {
     bool persistSession = true,
   }) async {
     final user = await _remote.registerProfessional(
-      name: name, email: email, password: password,
+      name: name, email: email, password: password, confirmPassword: password,
       profession: profession, bio: bio, location: location,
       experienceYears: experienceYears, serviceRate: serviceRate,
       educationLevel: educationLevel,

@@ -18,12 +18,14 @@ abstract class AuthRepository {
     required String name,
     required String email,
     required String password,
+    required String confirmPassword,
     required String profession,
     String? bio,
     String? location,
     int? experienceYears,
     double? serviceRate,
     String? educationLevel,
+    String? photoBase64,
     bool persistSession = true,
   });
 

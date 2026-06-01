@@ -27,6 +27,7 @@ class _ProfessionalRegisterScreenState
   final _nameController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  final _confirmPasswordController = TextEditingController();
   final _experienceController = TextEditingController();
   final _bioController = TextEditingController();
 
@@ -74,6 +75,7 @@ class _ProfessionalRegisterScreenState
     _nameController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
+    _confirmPasswordController.dispose();
     _experienceController.dispose();
     _bioController.dispose();
     super.dispose();
@@ -206,6 +208,13 @@ class _ProfessionalRegisterScreenState
                 label: 'Password',
                 hintText: '••••••••••••',
                 controller: _passwordController,
+                obscureText: true,
+              ),
+              const SizedBox(height: 16),
+              CustomTextField(
+                label: 'Confirm Password',
+                hintText: '••••••••••••',
+                controller: _confirmPasswordController,
                 obscureText: true,
               ),
               const SizedBox(height: 36),
@@ -371,10 +380,26 @@ class _ProfessionalRegisterScreenState
                       child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
                   : null,
               onPressed: auth.isLoading ? null : () async {
+                if (_passwordController.text.isEmpty ||
+                    _confirmPasswordController.text.isEmpty) {
+                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                    content: Text('Password fields are required'),
+                    backgroundColor: AppColors.danger,
+                  ));
+                  return;
+                }
+                if (_passwordController.text != _confirmPasswordController.text) {
+                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                    content: Text('Passwords do not match'),
+                    backgroundColor: AppColors.danger,
+                  ));
+                  return;
+                }
                 final success = await ref.read(authProvider.notifier).registerProfessional(
                   name:            _nameController.text.trim(),
                   email:           _emailController.text.trim(),
                   password:        _passwordController.text,
+                  confirmPassword: _confirmPasswordController.text,
                   profession:      _selectedProfession ?? '',
                   bio:             _bioController.text,
                   educationLevel:  _selectedEducation,
