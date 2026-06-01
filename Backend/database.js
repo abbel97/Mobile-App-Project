@@ -18,7 +18,7 @@ function save() {
   fs.writeFileSync(DB_PATH, Buffer.from(db.export()));
 }
 
-// SELECT — returns array of plain objects
+//SELECT, returns array of plain objects
 function query(sql, params = []) {
   const stmt = db.prepare(sql);
   stmt.bind(params);
@@ -28,10 +28,18 @@ function query(sql, params = []) {
   return rows;
 }
 
-// INSERT / UPDATE / DELETE — auto-saves to file
+//insert/update/delete, auto-saves to file
 function run(sql, params = []) {
   db.run(sql, params);
   save();
+}
+
+function ensureColumn(table, column, definition) {
+  const columns = query(`PRAGMA table_info(${table})`).map((item) => item.name);
+  if (!columns.includes(column)) {
+    db.run(`ALTER TABLE ${table} ADD COLUMN ${definition}`);
+    save();
+  }
 }
 
 function createTables() {
@@ -42,6 +50,7 @@ function createTables() {
       email      TEXT NOT NULL UNIQUE,
       password   TEXT NOT NULL,
       role       TEXT NOT NULL CHECK(role IN ('customer','professional')),
+      location   TEXT NOT NULL DEFAULT '',
       created_at TEXT NOT NULL
     )
   `);
@@ -52,6 +61,7 @@ function createTables() {
       description TEXT NOT NULL,
       profession  TEXT NOT NULL,
       location    TEXT NOT NULL,
+      customer_name TEXT NOT NULL DEFAULT '',
       status      TEXT NOT NULL DEFAULT 'pending',
       urgency     TEXT NOT NULL DEFAULT 'regular',
       customer_id TEXT NOT NULL,
@@ -78,6 +88,13 @@ function createTables() {
       FOREIGN KEY (user_id) REFERENCES users(id)
     )
   `);
+
+  ensureColumn('users', 'location', "location TEXT NOT NULL DEFAULT ''");
+  ensureColumn('service_requests', 'customer_name', "customer_name TEXT NOT NULL DEFAULT ''");
+  ensureColumn('users', 'photo_base64', 'photo_base64 TEXT');
+  ensureColumn('professionals', 'skills', 'skills TEXT');
+  ensureColumn('professionals', 'photo_base64', 'photo_base64 TEXT');
+  ensureColumn('service_requests', 'photo_base64', 'photo_base64 TEXT');
   save();
 }
 
