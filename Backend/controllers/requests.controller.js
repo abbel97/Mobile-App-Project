@@ -1,94 +1,155 @@
 const crypto = require('crypto');
 const { query, run } = require('../database');
 
-function createRequest(req, res) {
-  try {
-    const { title, description, profession, location, urgency } = req.body;
-    if (!title || !description || !profession || !location)
-      return res.status(400).json({ message: 'Title, description, profession and location are required' });
-
-    const id  = crypto.randomUUID();
-    const now = new Date().toISOString();
-
-    run(
-      `INSERT INTO service_requests
-         (id, title, description, profession, location, status, urgency, customer_id, created_at, updated_at)
-       VALUES (?,?,?,?,?,'pending',?,?,?,?)`,
-      [id, title, description, profession, location, urgency || 'regular', req.user.id, now, now]
-    );
-
-    return res.status(201).json(query('SELECT * FROM service_requests WHERE id = ?', [id])[0]);
-  } catch { return res.status(500).json({ message: 'Server error' }); }
-}
-
+// GET /api/requests
+// Customer → their own requests (all statuses)
+// Professional → all pending requests + requests they accepted
 function getRequests(req, res) {
   try {
     const { id, role } = req.user;
-    const requests = role === 'customer'
-      ? query('SELECT * FROM service_requests WHERE customer_id = ? ORDER BY created_at DESC', [id])
-      : query(`SELECT * FROM service_requests WHERE status = 'pending' OR accepted_by = ? ORDER BY created_at DESC`, [id]);
-    return res.json(requests);
-  } catch { return res.status(500).json({ message: 'Server error' }); }
+    const rows = role === 'customer'
+      ? query(
+          'SELECT * FROM service_requests WHERE customer_id = ? ORDER BY created_at DESC',
+          [id]
+        )
+      : query(
+          `SELECT * FROM service_requests
+           WHERE status = 'pending' OR accepted_by = ?
+           ORDER BY created_at DESC`,
+          [id]
+        );
+    return res.json(rows);
+  } catch {
+    return res.status(500).json({ message: 'Server error' });
+  }
 }
 
+// GET /api/requests/:id
 function getRequest(req, res) {
   try {
     const rows = query('SELECT * FROM service_requests WHERE id = ?', [req.params.id]);
-    if (rows.length === 0) return res.status(404).json({ message: 'Request not found' });
-    return res.json(rows[0]);
-  } catch { return res.status(500).json({ message: 'Server error' }); }
-}
-
-function updateRequest(req, res) {
-  try {
-    const { id } = req.params;
-    const rows = query('SELECT * FROM service_requests WHERE id = ?', [id]);
-    if (rows.length === 0)    
-        return res.status(404).json({ message: 'Request not found' });
-    if (rows[0].customer_id !== req.user.id) 
-      return res.status(403).json({ message: 'Access denied' });
-    if (rows[0].status !== 'pending')    
-        return res.status(400).json({ message: 'Only pending requests can be edited' });
-
-    const r   = rows[0];
-    const now = new Date().toISOString();
-    const { title, description, profession, location, urgency } = req.body;
-
-    run(
-      `UPDATE service_requests SET title=?, description=?, profession=?, location=?, urgency=?, updated_at=? WHERE id=?`,
-      [title||r.title, description||r.description, profession||r.profession, location||r.location, urgency||r.urgency, now, id]
-    );
-    return res.json(query('SELECT * FROM service_requests WHERE id = ?', [id])[0]);
-  } catch { return res.status(500).json({ message: 'Server error' }); }
-}
-
-function deleteRequest(req, res) {
-  try {
-    const { id } = req.params;
-    const rows = query('SELECT * FROM service_requests WHERE id = ?', [id]);
     if (rows.length === 0)
       return res.status(404).json({ message: 'Request not found' });
-    if (rows[0].customer_id !== req.user.id) 
-      return res.status(403).json({ message: 'Access denied' });
-    run('DELETE FROM service_requests WHERE id = ?', [id]);
-    return res.json({ message: 'Request deleted' });
-  } catch { return res.status(500).json({ message: 'Server error' }); }
+    return res.json(rows[0]);
+  } catch {
+    return res.status(500).json({ message: 'Server error' });
+  }
 }
 
+// POST /api/requests  (customer only)
+function createRequest(req, res) {
+  try {
+    const { title, description, profession, location, urgency = 'regular', photo_base64 } = req.body;
+    if (!title || !description || !profession || !location)
+      return res.status(400).json({
+        message: 'title, description, profession and location are required',
+      });
+
+    const id  = crypto.randomUUID();
+    const now = new Date().toISOString();
+    const customer = query('SELECT name FROM users WHERE id = ?', [req.user.id]);
+    const customerName = customer[0]?.name || '';
+    run(
+      `INSERT INTO service_requests
+         (id, title, description, profession, location, customer_name, status, urgency, customer_id, photo_base64, created_at, updated_at)
+       VALUES (?,?,?,?,?,?,?,?,?,?,?,?)`,
+      [id, title, description, profession, location, customerName, 'pending', urgency, req.user.id, photo_base64 || null, now, now]
+    );
+    const rows = query('SELECT * FROM service_requests WHERE id = ?', [id]);
+    return res.status(201).json(rows[0]);
+  } catch {
+    return res.status(500).json({ message: 'Server error' });
+  }
+}
+
+// PUT /api/requests/:id  (customer only, only if pending)
+function updateRequest(req, res) {
+  try {
+    const rows = query('SELECT * FROM service_requests WHERE id = ?', [req.params.id]);
+    if (rows.length === 0)
+      return res.status(404).json({ message: 'Request not found' });
+
+    const r = rows[0];
+    if (r.customer_id !== req.user.id)
+      return res.status(403).json({ message: 'Access denied' });
+    if (r.status !== 'pending')
+      return res.status(400).json({ message: 'Only pending requests can be edited' });
+
+    const { title, description, profession, location, urgency } = req.body;
+    const now = new Date().toISOString();
+    run(
+      `UPDATE service_requests SET
+         title       = COALESCE(?, title),
+         description = COALESCE(?, description),
+         profession  = COALESCE(?, profession),
+         location    = COALESCE(?, location),
+         urgency     = COALESCE(?, urgency),
+         updated_at  = ?
+       WHERE id = ?`,
+      [
+        title       ?? null,
+        description ?? null,
+        profession  ?? null,
+        location    ?? null,
+        urgency     ?? null,
+        now,
+        req.params.id,
+      ]
+    );
+    const updated = query('SELECT * FROM service_requests WHERE id = ?', [req.params.id]);
+    return res.json(updated[0]);
+  } catch {
+    return res.status(500).json({ message: 'Server error' });
+  }
+}
+
+// DELETE /api/requests/:id  (customer only, only if pending)
+function deleteRequest(req, res) {
+  try {
+    const rows = query('SELECT * FROM service_requests WHERE id = ?', [req.params.id]);
+    if (rows.length === 0)
+      return res.status(404).json({ message: 'Request not found' });
+
+    const r = rows[0];
+    if (r.customer_id !== req.user.id)
+      return res.status(403).json({ message: 'Access denied' });
+    if (r.status !== 'pending')
+      return res.status(400).json({ message: 'Only pending requests can be deleted' });
+
+    run('DELETE FROM service_requests WHERE id = ?', [req.params.id]);
+    return res.json({ message: 'Request deleted' });
+  } catch {
+    return res.status(500).json({ message: 'Server error' });
+  }
+}
+
+// PUT /api/requests/:id/accept  (professional only)
 function acceptRequest(req, res) {
   try {
-    const { id } = req.params;
-    const rows = query('SELECT * FROM service_requests WHERE id = ?', [id]);
-    if (rows.length === 0)         
+    const rows = query('SELECT * FROM service_requests WHERE id = ?', [req.params.id]);
+    if (rows.length === 0)
       return res.status(404).json({ message: 'Request not found' });
-    if (rows[0].status !== 'pending') 
-      return res.status(400).json({ message: 'Request no longer available' });
+
+    const r = rows[0];
+    if (r.status !== 'pending')
+      return res.status(400).json({ message: 'Request is no longer available' });
 
     const now = new Date().toISOString();
-    run(`UPDATE service_requests SET status='accepted', accepted_by=?, updated_at=? WHERE id=?`,
-      [req.user.id, now, id]);
-    return res.json(query('SELECT * FROM service_requests WHERE id = ?', [id])[0]);
-  } catch { return res.status(500).json({ message: 'Server error' }); }
+    run(
+      `UPDATE service_requests
+       SET status = 'accepted', accepted_by = ?, updated_at = ?
+       WHERE id = ?`,
+      [req.user.id, now, req.params.id]
+    );
+    const updated = query('SELECT * FROM service_requests WHERE id = ?', [req.params.id]);
+    return res.json(updated[0]);
+  } catch {
+    return res.status(500).json({ message: 'Server error' });
+  }
 }
 
-module.exports = { createRequest, getRequests, getRequest, updateRequest, deleteRequest, acceptRequest };
+module.exports = {
+  getRequests, getRequest,
+  createRequest, updateRequest, deleteRequest,
+  acceptRequest,
+};
