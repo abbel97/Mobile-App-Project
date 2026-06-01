@@ -4,10 +4,13 @@ const cors    = require('cors');
 const { initDatabase } = require('./database');
 
 const app  = express();
-const PORT = process.env.PORT || 3000;
+const PORT = Number(process.env.PORT || 3000);
 
 app.use(cors());
-app.use(express.json());
+app.use(express.json({ limit: '10mb' })); // ← keep the 10mb limit for images
+
+// Health check — Flutter uses this to find the server
+app.get('/api/ping', (_, res) => res.json({ pong: true }));
 
 app.use('/api/auth',          require('./routes/auth.routes'));
 app.use('/api/requests',      require('./routes/requests.routes'));
@@ -17,9 +20,10 @@ app.get('/', (_, res) => res.json({ message: 'Home Tweak API running' }));
 
 async function start() {
   await initDatabase();
-  app.listen(PORT, () =>
-    console.log(`🚀 Server on http://localhost:${PORT}`)
-  );
+  app.listen(PORT, () => {
+    console.log(`✅ Database ready`);
+    console.log(`🚀 Server on http://localhost:${PORT}`);
+  });
 }
 
 start();
