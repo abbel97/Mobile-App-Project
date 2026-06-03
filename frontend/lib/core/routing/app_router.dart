@@ -60,7 +60,6 @@ final routerProvider = Provider<GoRouter>((ref) {
         return AppRoutes.home;
       }
 
-      // Role-based authorization
       if (isAuth && isCust && location.startsWith(professionalPrefix)) {
         return AppRoutes.customerDashboard;
       }

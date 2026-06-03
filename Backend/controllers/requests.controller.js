@@ -1,9 +1,7 @@
 const crypto = require('crypto');
 const { query, run } = require('../database');
 
-// GET /api/requests
-// Customer → their own requests (all statuses)
-// Professional → all pending requests + requests they accepted
+
 function getRequests(req, res) {
   try {
     const { id, role } = req.user;

@@ -58,7 +58,10 @@ class AuthRepositoryImpl implements AuthRepository {
     bool persistSession = true,
   }) async {
     final user = await _remote.registerProfessional(
-      name: name, email: email, password: password, confirmPassword: password,
+      name: name,
+      email: email,
+      password: password,
+      confirmPassword: confirmPassword,
       profession: profession, bio: bio, location: location,
       experienceYears: experienceYears, serviceRate: serviceRate,
       educationLevel: educationLevel,
