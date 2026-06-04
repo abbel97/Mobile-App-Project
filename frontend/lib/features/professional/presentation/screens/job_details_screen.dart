@@ -158,6 +158,7 @@ class JobDetailsScreen extends ConsumerWidget {
                             Text(request.customerName ?? 'Customer Name',
                               style: AppTextStyles.titleSmall
                                   .copyWith(color: AppColors.textPrimary)),
+                          const SizedBox(height: 6),
                            Text('PROFESSION',
                               style: AppTextStyles.labelMedium.copyWith(
                                   color: AppColors.textMuted, fontSize: 10)),
@@ -208,7 +209,6 @@ class JobDetailsScreen extends ConsumerWidget {
                       ),
                     ),
                     const SizedBox(height: 24),
-                    // Replace the two placeholder boxes:
                     if (request.photoBase64 != null && request.photoBase64!.isNotEmpty)
                       ClipRRect(
                         borderRadius: BorderRadius.circular(AppRadii.sm),
@@ -244,15 +244,29 @@ class JobDetailsScreen extends ConsumerWidget {
                 children: [
                   Expanded(
                     child: GreenButton(
-                      label: state.isLoading ? 'Accepting...' : 'Accept Job',
+                      label: state.isLoading ? 'Applying...' : 'Apply Job',
                       height: 52,
                       onPressed: state.isLoading
-                          ? null
-                          : () => ref
-                              .read(serviceRequestProvider.notifier)
-                              .acceptRequest(jobId),
+                            ? null
+                            : () async {
+                                await ref
+                                    .read(serviceRequestProvider.notifier)
+                                    .applyRequest(jobId);
+                                if (!context.mounted) return;
+                               
+                                showDialog(
+                                  context: context,
+                                  barrierDismissible: false,
+                                  builder: (_) => _JobAppliedDialog(
+                                    onClose: () {
+                                      Navigator.of(context).pop();
+                                      context.go(AppRoutes.jobs);
+                                },
+                              ),
+                            );
+                          },
+                      ),
                     ),
-                  ),
                   const SizedBox(width: 12),
                   Container(
                     width: 52,
@@ -262,15 +276,66 @@ class JobDetailsScreen extends ConsumerWidget {
                       borderRadius: BorderRadius.circular(AppRadii.sm),
                       border: Border.all(color: AppColors.border),
                     ),
-                    child: IconButton(
-                      onPressed: () {},
-                      icon: const Icon(
-                        Icons.chat_bubble_outline_rounded,
-                        color: AppColors.primary,
-                        size: 22),
-                      ),
                    ),
                 ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _JobAppliedDialog extends StatelessWidget {
+  final VoidCallback onClose;
+  const _JobAppliedDialog({required this.onClose});
+
+  @override
+  Widget build(BuildContext context) {
+    return Dialog(
+      shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppRadii.lg)),
+      child: Padding(
+        padding: const EdgeInsets.all(28),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 72, height: 72,
+              decoration: BoxDecoration(
+                color: AppColors.success.withValues(alpha: 0.12),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(Icons.check_circle_outline_rounded,
+                  color: AppColors.success, size: 38),
+            ),
+            const SizedBox(height: 20),
+            Text('Application Submitted!',
+                style: AppTextStyles.titleMedium
+                    .copyWith(color: AppColors.textPrimary),
+                textAlign: TextAlign.center),
+            const SizedBox(height: 12),
+            Text(
+              "You'll receive a notification if the customer selects you for this job.",
+              style: AppTextStyles.bodyMedium
+                  .copyWith(color: AppColors.textBody),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 28),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: onClose,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primary,
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(AppRadii.sm)),
+                ),
+                child: Text('Back to Jobs',
+                    style: AppTextStyles.button
+                        .copyWith(color: Colors.white)),
               ),
             ),
           ],

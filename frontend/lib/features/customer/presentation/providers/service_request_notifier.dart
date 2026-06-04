@@ -143,6 +143,56 @@ class ServiceRequestNotifier extends StateNotifier<ServiceRequestState> {
     }
   }
 
+  Future<void> applyRequest(String id) async {
+  state = state.copyWith(isLoading: true, clearError: true, clearSuccess: true);
+  try {
+    final applied = await _repo.applyRequest(id);
+    state = state.copyWith(
+      requests:  state.requests.map((r) => r.id == id ? applied : r).toList(),
+      isLoading: false,
+      isSuccess: true,
+    );
+  } on Failure catch (e) {
+    state = state.copyWith(isLoading: false, error: e.message);
+  } catch (_) {
+    state = state.copyWith(isLoading: false, error: 'Failed to apply');
+  }
+  }
+
+  Future<void> confirmRequest({
+    required String id,
+    required String customerPhone,
+  }) async {
+    state = state.copyWith(isLoading: true, clearError: true, clearSuccess: true);
+    try {
+      final confirmed = await _repo.confirmRequest(id: id, customerPhone: customerPhone);
+      state = state.copyWith(
+        requests:  state.requests.map((r) => r.id == id ? confirmed : r).toList(),
+        isLoading: false,
+        isSuccess: true,
+      );
+    } on Failure catch (e) {
+      state = state.copyWith(isLoading: false, error: e.message);
+    } catch (_) {
+      state = state.copyWith(isLoading: false, error: 'Failed to confirm');
+    }
+  }
+
+  Future<void> rejectApplicant(String id) async {
+    state = state.copyWith(isLoading: true, clearError: true);
+    try {
+      final updated = await _repo.rejectApplicant(id);
+      state = state.copyWith(
+        requests:  state.requests.map((r) => r.id == id ? updated : r).toList(),
+        isLoading: false,
+      );
+    } on Failure catch (e) {
+      state = state.copyWith(isLoading: false, error: e.message);
+    } catch (_) {
+      state = state.copyWith(isLoading: false, error: 'Failed to reject');
+    }
+  }
+
   void clearError()   => state = state.copyWith(clearError: true);
   void clearSuccess() => state = state.copyWith(clearSuccess: true);
 }

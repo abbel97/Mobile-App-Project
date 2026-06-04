@@ -116,7 +116,7 @@ class _ProfessionalSettingsScreenState
                           icon: Icons.notifications_none_rounded,
                           title: 'Notification Settings',
                           subtitle: 'Push, Email, and SMS',
-                          onTap: () => context.push(AppRoutes.notifications),
+                          onTap: () => context.push(AppRoutes.controlAndAlerts),
                         ),
                         const _Divider(),
                         _SettingsSwitchTile(

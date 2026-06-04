@@ -32,7 +32,8 @@ class ServiceRequestEntity extends Equatable {
   });
 
   bool get isPending  => status == 'pending';
-  bool get isAccepted => status == 'accepted';
+  bool get isAccepted => status == 'accepted' || status == 'applied';
+  bool get isConfirmed => status == 'confirmed';
 
   @override
   List<Object?> get props => [id, status, customerName];

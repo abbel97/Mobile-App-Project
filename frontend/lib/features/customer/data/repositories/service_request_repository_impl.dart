@@ -66,6 +66,27 @@ class ServiceRequestRepositoryImpl implements ServiceRequestRepository {
     return r;
   }
 
+  Future<ServiceRequestEntity> applyRequest(String id) async {
+  final r = await _remote.applyRequest(id);
+  await _local.saveRequest(r);
+  return r;
+  }
+
+  Future<ServiceRequestEntity> confirmRequest({
+    required String id,
+    required String customerPhone,
+  }) async {
+    final r = await _remote.confirmRequest(id: id, customerPhone: customerPhone);
+    await _local.saveRequest(r);
+    return r;
+  }
+
+  Future<ServiceRequestEntity> rejectApplicant(String id) async {
+    final r = await _remote.rejectApplicant(id);
+    await _local.saveRequest(r);
+    return r;
+  }
+
   @override
   Future<void> deleteRequest(String id) async {
     await _remote.deleteRequest(id);

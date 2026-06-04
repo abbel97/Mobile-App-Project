@@ -125,7 +125,7 @@ class _CustomerSettingsScreenState extends ConsumerState<CustomerSettingsScreen>
                           icon: Icons.notifications_none_rounded,
                           title: 'Notification Settings',
                           subtitle: 'Manage email and push alerts',
-                          onTap: () => context.push(AppRoutes.notifications),
+                          onTap: () => context.push(AppRoutes.controlAndAlerts),
                         ),
                       ],
                     ),

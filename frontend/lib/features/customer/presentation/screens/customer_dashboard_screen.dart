@@ -9,6 +9,7 @@ import '../../../../core/theme/app_text_styles.dart';
 import '../../../auth/presentation/providers/auth_notifier.dart';
 import '../providers/service_request_notifier.dart';
 import '../widgets/customer_bottom_nav_bar.dart';
+import '../../../shared/presentation/providers/notification_provider.dart';
 
 class CustomerDashboardScreen extends ConsumerStatefulWidget {
   const CustomerDashboardScreen({super.key});
@@ -154,16 +155,18 @@ String _firstName(String? name) {
   return value.split(RegExp(r'\s+')).first;
 }
 
-class _Header extends StatelessWidget {
+class _Header extends ConsumerWidget {
   const _Header();
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final unread = ref.watch(notificationProvider).unreadCount;
+
+
     return Row(
       children: [
         Container(
-          width: 30,
-          height: 30,
+          width: 30, height: 30,
           decoration: BoxDecoration(
             color: AppColors.neutral,
             borderRadius: BorderRadius.circular(9),
@@ -175,17 +178,42 @@ class _Header extends StatelessWidget {
           ),
         ),
         const SizedBox(width: 12),
-        Text(
-          'HOME-TWEAK',
+        Text('HOME-TWEAK',
           style: AppTextStyles.titleMedium.copyWith(
-            fontSize: 22,
-            color: AppColors.primary,
+            fontSize: 22, color: AppColors.primary,
           ),
         ),
-      ],
-    );
-  }
-}
+        const Spacer(),
+        GestureDetector(
+          onTap: () => context.push(AppRoutes.notifications),
+          child: Stack(
+            children: [
+              const Icon(Icons.notifications_outlined,
+                  color: AppColors.primary, size: 26),
+              if (unread > 0)
+                        Positioned(
+                          right: 0, top: 0,
+                          child: Container(
+                            width: 16, height: 16,
+                            decoration: const BoxDecoration(
+                                color: AppColors.danger, shape: BoxShape.circle),
+                            child: Center(
+                              child: Text(
+                                unread > 9 ? '9+' : unread.toString(),
+                                style: const TextStyle(
+                                    color: Colors.white, fontSize: 9,
+                                    fontWeight: FontWeight.bold),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              );
+            }
+          }
 
 class _EmergencyCard extends StatelessWidget {
   final VoidCallback? onPressed;

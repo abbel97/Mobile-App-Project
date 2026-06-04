@@ -28,8 +28,9 @@ class ServiceRequestRemoteDataSource {
       'profession': profession, 'location': location, 'urgency': urgency,
       if (photoBase64 != null) 'photo_base64': photoBase64,
     });
-    if (res.statusCode == 201)
+    if (res.statusCode == 201) {
       return ServiceRequestModel.fromJson(jsonDecode(res.body) as Map<String, dynamic>);
+    }
     throw ServerFailure(_msg(res.body));
   }
 
@@ -45,8 +46,9 @@ class ServiceRequestRemoteDataSource {
       if (location != null)    'location': location,
       if (urgency != null)     'urgency': urgency,
     });
-    if (res.statusCode == 200)
+    if (res.statusCode == 200) {
       return ServiceRequestModel.fromJson(jsonDecode(res.body) as Map<String, dynamic>);
+    }
     throw ServerFailure(_msg(res.body));
   }
 
@@ -57,8 +59,41 @@ class ServiceRequestRemoteDataSource {
 
   Future<ServiceRequestModel> acceptRequest(String id) async {
     final res = await ApiClient.put('/requests/$id/accept', {});
-    if (res.statusCode == 200)
+    if (res.statusCode == 200) {
       return ServiceRequestModel.fromJson(jsonDecode(res.body) as Map<String, dynamic>);
+    }
+    throw ServerFailure(_msg(res.body));
+  }
+
+  Future<ServiceRequestModel> applyRequest(String id) async {
+  final res = await ApiClient.put('/requests/$id/apply', {});
+  if (res.statusCode == 200) {
+    return ServiceRequestModel.fromJson(
+        jsonDecode(res.body) as Map<String, dynamic>);
+  }
+  throw ServerFailure(_msg(res.body));
+  }
+
+  Future<ServiceRequestModel> confirmRequest({
+    required String id,
+    required String customerPhone,
+  }) async {
+    final res = await ApiClient.put('/requests/$id/confirm', {
+      'customer_phone': customerPhone,
+    });
+    if (res.statusCode == 200) {
+      return ServiceRequestModel.fromJson(
+          jsonDecode(res.body) as Map<String, dynamic>);
+    }
+    throw ServerFailure(_msg(res.body));
+  }
+
+  Future<ServiceRequestModel> rejectApplicant(String id) async {
+    final res = await ApiClient.put('/requests/$id/reject-applicant', {});
+    if (res.statusCode == 200) {
+      return ServiceRequestModel.fromJson(
+          jsonDecode(res.body) as Map<String, dynamic>);
+    }
     throw ServerFailure(_msg(res.body));
   }
 
@@ -72,3 +107,4 @@ class ServiceRequestRemoteDataSource {
       }
   }
 }
+

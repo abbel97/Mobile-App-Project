@@ -9,6 +9,7 @@ import '../../../../core/theme/app_text_styles.dart';
 import '../../../auth/presentation/providers/auth_notifier.dart';
 import '../../../customer/presentation/providers/service_request_notifier.dart';
 import '../widgets/professional_bottom_nav_bar.dart';
+import '../../../shared/presentation/providers/notification_provider.dart';
 
 class ProfessionalDashboardScreen extends ConsumerWidget {
   const ProfessionalDashboardScreen({super.key});
@@ -20,6 +21,7 @@ class ProfessionalDashboardScreen extends ConsumerWidget {
     final srState = ref.watch(serviceRequestProvider);
     final applied = srState.requests.where((r) => r.acceptedBy == auth.user?.id).length;
     final confirmed = srState.requests.where((r) => r.acceptedBy == auth.user?.id && r.status == 'confirmed').length;
+    final unread = ref.watch(notificationProvider).unreadCount;
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -31,8 +33,7 @@ class ProfessionalDashboardScreen extends ConsumerWidget {
                 padding: const EdgeInsets.fromLTRB(24, 8, 24, 24),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    
+                  children: [  
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
@@ -64,6 +65,34 @@ class ProfessionalDashboardScreen extends ConsumerWidget {
                             borderRadius: BorderRadius.circular(AppRadii.md),
                           ),
                         ),
+                        const Spacer(),
+                          GestureDetector(
+                            onTap: () => context.push(AppRoutes.notifications),
+                            child: Stack(
+                              children: [
+                                const Icon(Icons.notifications_outlined,
+                                    color: AppColors.primary, size: 26),
+                                if (unread > 0)
+                                          Positioned(
+                                            right: 0, top: 0,
+                                            child: Container(
+                                              width: 16, height: 16,
+                                              decoration: const BoxDecoration(
+                                                  color: AppColors.danger, shape: BoxShape.circle),
+                                              child: Center(
+                                                child: Text(
+                                                  unread > 9 ? '9+' : unread.toString(),
+                                                  style: const TextStyle(
+                                                      color: Colors.white, fontSize: 9,
+                                                      fontWeight: FontWeight.bold),
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                        
                       ],
                     ),
                     const SizedBox(height: 18),
