@@ -18,7 +18,6 @@ function save() {
   fs.writeFileSync(DB_PATH, Buffer.from(db.export()));
 }
 
-//SELECT, returns array of plain objects
 function query(sql, params = []) {
   const stmt = db.prepare(sql);
   stmt.bind(params);
@@ -28,7 +27,6 @@ function query(sql, params = []) {
   return rows;
 }
 
-//insert/update/delete, auto-saves to file
 function run(sql, params = []) {
   db.run(sql, params);
   save();
@@ -89,12 +87,28 @@ function createTables() {
     )
   `);
 
+  db.run(`
+  CREATE TABLE IF NOT EXISTS notifications (
+    id         TEXT PRIMARY KEY,
+    user_id    TEXT NOT NULL,
+    title      TEXT NOT NULL,
+    body       TEXT NOT NULL,
+    type       TEXT NOT NULL,
+    request_id TEXT,
+    is_read    INTEGER NOT NULL DEFAULT 0,
+    created_at TEXT NOT NULL,
+    FOREIGN KEY (user_id) REFERENCES users(id)
+  )
+`);
+
+
   ensureColumn('users', 'location', "location TEXT NOT NULL DEFAULT ''");
   ensureColumn('service_requests', 'customer_name', "customer_name TEXT NOT NULL DEFAULT ''");
   ensureColumn('users', 'photo_base64', 'photo_base64 TEXT');
   ensureColumn('professionals', 'skills', 'skills TEXT');
   ensureColumn('professionals', 'photo_base64', 'photo_base64 TEXT');
   ensureColumn('service_requests', 'photo_base64', 'photo_base64 TEXT');
+  ensureColumn('notifications', 'request_id', 'request_id TEXT');
   save();
 }
 

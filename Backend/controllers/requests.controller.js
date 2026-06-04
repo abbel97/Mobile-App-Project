@@ -146,8 +146,126 @@ function acceptRequest(req, res) {
   }
 }
 
+
+function applyRequest(req, res) {
+  try {
+    const rows = query('SELECT * FROM service_requests WHERE id = ?', [req.params.id]);
+    if (rows.length === 0)
+      return res.status(404).json({ message: 'Request not found' });
+    if (rows[0].status !== 'pending')
+      return res.status(400).json({ message: 'This job is no longer available' });
+
+    const now = new Date().toISOString();
+    run(
+      `UPDATE service_requests SET status='applied', accepted_by=?, updated_at=? WHERE id=?`,
+      [req.user.id, now, req.params.id]
+    );
+
+    // Notify the customer
+    const prof = query(
+      'SELECT u.name FROM users u WHERE u.id = ?',
+      [req.user.id]
+    );
+    const profName = prof[0]?.name || 'A professional';
+
+    run(
+      `INSERT INTO notifications (id, user_id, title, body, type, request_id, is_read, created_at)
+       VALUES (?,?,?,?,?,?,0,?)`,
+      [
+        require('crypto').randomUUID(),
+        rows[0].customer_id,
+        'New Application Received',
+        `${profName} has applied for your "${rows[0].title}" request. Tap to review and hire.`,
+        'new_application',
+        req.params.id,
+        now,
+      ]
+    );
+
+    return res.json(query('SELECT * FROM service_requests WHERE id = ?', [req.params.id])[0]);
+  } catch { return res.status(500).json({ message: 'Server error' }); }
+}
+
+
+function confirmRequest(req, res) {
+  try {
+    const { customer_phone } = req.body;
+    const rows = query('SELECT * FROM service_requests WHERE id = ?', [req.params.id]);
+
+    if (rows.length === 0)
+      return res.status(404).json({ message: 'Request not found' });
+    if (rows[0].customer_id !== req.user.id)
+      return res.status(403).json({ message: 'Access denied' });
+    if (rows[0].status !== 'applied')
+      return res.status(400).json({ message: 'No applicant on this request' });
+
+    const now = new Date().toISOString();
+    run(
+      `UPDATE service_requests SET status='confirmed', updated_at=? WHERE id=?`,
+      [now, req.params.id]
+    );
+
+    const customer  = query('SELECT name, email FROM users WHERE id=?', [req.user.id]);
+    const profUser  = query('SELECT name FROM users WHERE id=?', [rows[0].accepted_by]);
+    const contact   = customer_phone
+      ? `Phone: ${customer_phone}`
+      : `Email: ${customer[0]?.email}`;
+
+    run(
+      `INSERT INTO notifications (id, user_id, title, body, type, request_id, is_read, created_at)
+       VALUES (?,?,?,?,?,?,0,?)`,
+      [
+        require('crypto').randomUUID(),
+        rows[0].accepted_by,
+        '🎉 You\'ve been hired!',
+        `${customer[0]?.name} hired you for "${rows[0].title}". Contact them — ${contact}`,
+        'hired',
+        req.params.id,
+        now,
+      ]
+    );
+
+    run(
+      `INSERT INTO notifications (id, user_id, title, body, type, request_id, is_read, created_at)
+       VALUES (?,?,?,?,?,?,0,?)`,
+      [
+        require('crypto').randomUUID(),
+        req.user.id,
+        'Booking Confirmed',
+        `You hired ${profUser[0]?.name} for "${rows[0].title}". They will contact you soon.`,
+        'confirmed',
+        req.params.id,
+        now,
+      ]
+    );
+
+    return res.json(query('SELECT * FROM service_requests WHERE id = ?', [req.params.id])[0]);
+  } catch { return res.status(500).json({ message: 'Server error' }); }
+}
+
+function rejectApplicant(req, res) {
+  try {
+    const rows = query('SELECT * FROM service_requests WHERE id = ?', [req.params.id]);
+
+    if (rows.length === 0)
+      return res.status(404).json({ message: 'Request not found' });
+    if (rows[0].customer_id !== req.user.id)
+      return res.status(403).json({ message: 'Access denied' });
+    if (rows[0].status !== 'applied')
+      return res.status(400).json({ message: 'No applicant to reject' });
+
+    const now = new Date().toISOString();
+    run(
+      `UPDATE service_requests SET status='pending', accepted_by=NULL, updated_at=? WHERE id=?`,
+      [now, req.params.id]
+    );
+
+    return res.json(query('SELECT * FROM service_requests WHERE id = ?', [req.params.id])[0]);
+  } catch { return res.status(500).json({ message: 'Server error' }); }
+}
+
 module.exports = {
   getRequests, getRequest,
   createRequest, updateRequest, deleteRequest,
-  acceptRequest,
+  acceptRequest, confirmRequest, applyRequest, rejectApplicant,
 };
