@@ -6,7 +6,7 @@ class ApiClient {
   // Android emulator -> 10.0.2.2,
   // iOS simulator/chrome -> localhost, 
   //physical device -> local network IP
-  static const String _base = 'http://192.168.56.1:3000/api';
+  static const String _base = 'http://192.168.1.8:3000/api';
   static const Duration _timeout = Duration(seconds: 15);
 
   static Future<String?> _token() async {

@@ -1,7 +1,7 @@
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 
-class AppDatabase {
+class AppDatabase{
   static Database? _db;
 
   static Future<Database> get database async {
@@ -13,23 +13,40 @@ class AppDatabase {
     final path = join(await getDatabasesPath(), 'home_tweak.db');
     return openDatabase(
       path,
-      version: 5,           
+      version: 6,           
       onCreate: _createTables,
       onUpgrade: (db, oldV, newV) async {
-        if (oldV < 2) {
+        if (oldV < 2){
           try { await db.execute('ALTER TABLE service_requests ADD COLUMN accepted_by TEXT'); } catch (_) {}
         }
-        if (oldV < 3) {
+        if (oldV < 3){
           try { await db.execute("ALTER TABLE users ADD COLUMN location TEXT NOT NULL DEFAULT ''"); } catch (_) {}
           try { await db.execute("ALTER TABLE service_requests ADD COLUMN customer_name TEXT NOT NULL DEFAULT ''"); } catch (_) {}
         }
-        if (oldV < 4) {  
+        if (oldV < 4){  
           try { await db.execute('ALTER TABLE users ADD COLUMN photo_base64 TEXT'); } catch (_) {}
           try { await db.execute('ALTER TABLE professionals ADD COLUMN photo_base64 TEXT'); } catch (_) {}
           try { await db.execute('ALTER TABLE professionals ADD COLUMN skills TEXT'); } catch (_) {}
         }
-        if (oldV < 5) {
+        if (oldV < 5){
           try { await db.execute('ALTER TABLE service_requests ADD COLUMN photo_base64 TEXT'); } catch (_) {}
+        }
+        if (oldV < 6){
+          try{
+            await db.execute('''
+              CREATE TABLE IF NOT EXISTS notifications (
+                id         TEXT PRIMARY KEY,
+                user_id    TEXT NOT NULL,
+                title      TEXT NOT NULL,
+                body       TEXT NOT NULL,
+                type       TEXT NOT NULL,
+                request_id TEXT,
+                is_read    INTEGER NOT NULL DEFAULT 0,
+                created_at TEXT NOT NULL
+              )
+            ''');
+          }
+          catch (_) {}
         }
       },
     );
@@ -83,6 +100,19 @@ class AppDatabase {
         photo_base64     TEXT,
         created_at       TEXT NOT NULL,
         updated_at       TEXT NOT NULL
+      )
+    ''');
+
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS notifications (
+        id         TEXT PRIMARY KEY,
+        user_id    TEXT NOT NULL,
+        title      TEXT NOT NULL,
+        body       TEXT NOT NULL,
+        type       TEXT NOT NULL,
+        request_id TEXT,
+        is_read    INTEGER NOT NULL DEFAULT 0,
+        created_at TEXT NOT NULL
       )
     ''');
   }

@@ -11,7 +11,7 @@ class AppRoutes {
 	static const changePassword = '/auth/change-password';
 
 	static const customerDashboard = '/customer/dashboard';
-    static const customerRequestSubmit = '/customer/request-submission';
+  static const customerRequestSubmit = '/customer/request-submission';
 	static const customerRequests = '/customer/requests';
 	static const customerRequestEdit = '/customer/request-edit/:requestId';
 	static const customerProfileEdit = '/customer/profile-edit';
@@ -26,8 +26,9 @@ class AppRoutes {
 
 	static const professionalsList = '/professionals';
 	static const professionalProfileDetail = '/professionals/:professionalId';
-	static const notifications = '/notifications';
+	static const controlAndAlerts = '/control-and-alerts';
 	static const termsAndPolicy = '/terms-policy';
+  static const notifications = '/notifications';
 
   static String jobDetailsPath(String jobId) =>
       '/professional/jobs/$jobId';

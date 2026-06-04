@@ -21,10 +21,11 @@ import '../../features/professional/presentation/screens/professional_dashboard_
 import '../../features/professional/presentation/screens/professional_edit_screen.dart';
 import '../../features/professional/presentation/screens/professional_settings_screen.dart';
 import '../../features/shared/presentation/screens/home_screen.dart';
-import '../../features/shared/presentation/screens/notification_screen.dart';
+import '../../features/shared/presentation/screens/control_and_alert_screen.dart';
 import '../../features/shared/presentation/screens/professional_profile_detail_screen.dart';
 import '../../features/shared/presentation/screens/professionals_list_screen.dart';
 import '../../features/shared/presentation/screens/terms_and_policy_screen.dart';
+import '../../features/shared/presentation/screens/notification_screen.dart';
 import '../../features/splash/presentation/screens/splash_screen.dart';
 import 'app_routes.dart';
 
@@ -137,10 +138,12 @@ final routerProvider = Provider<GoRouter>((ref) {
           professionalId: state.pathParameters['professionalId']!,
         ),
       ),
-      GoRoute(path: AppRoutes.notifications,
-          builder: (context, state) => const NotificationScreen()),
+      GoRoute(path: AppRoutes.controlAndAlerts,
+          builder: (context, state) => const ControlAndAlertScreen()),
       GoRoute(path: AppRoutes.termsAndPolicy,
           builder: (context, state) => const TermsAndPolicyScreen()),
+      GoRoute(path: AppRoutes.notifications,
+          builder: (context, state) => const NotificationScreen()),
     ],
   );
 });
