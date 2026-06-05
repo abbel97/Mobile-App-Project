@@ -193,7 +193,7 @@ class _ProfessionalEditScreenState
                             .copyWith(color: AppColors.textPrimary)),
                     const SizedBox(height: 10),
                     DropdownButtonFormField<String>(
-                      value: _selectedProfession,
+                      initialValue: _selectedProfession,
                       decoration: _dropDecoration(),
                       hint: Text('Select profession',
                           style: AppTextStyles.bodyRegular
@@ -277,7 +277,7 @@ class _ProfessionalEditScreenState
                             .copyWith(color: AppColors.textPrimary)),
                     const SizedBox(height: 10),
                     DropdownButtonFormField<String>(
-                      value: _selectedEducation,
+                      initialValue: _selectedEducation,
                       decoration: _dropDecoration(),
                       hint: Text('Select level',
                           style: AppTextStyles.bodyRegular

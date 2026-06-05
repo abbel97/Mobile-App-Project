@@ -38,14 +38,14 @@ class JobDetailsScreen extends ConsumerWidget {
   final request = matches.first;
 
   ref.listen<ServiceRequestState>(serviceRequestProvider, (_, next) {
-    if (next.isSuccess) {
+    /* if (next.isSuccess) {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
         content: Text('Job accepted!'),
         backgroundColor: AppColors.success,
       ));
       ref.read(serviceRequestProvider.notifier).clearSuccess();
       context.push(AppRoutes.acceptedJobs);
-    }
+    } */
     if (next.error != null) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text(next.error!), backgroundColor: AppColors.danger));
@@ -253,6 +253,12 @@ class JobDetailsScreen extends ConsumerWidget {
                                     .read(serviceRequestProvider.notifier)
                                     .applyRequest(jobId);
                                 if (!context.mounted) return;
+
+                                 final currentState = ref.read(serviceRequestProvider);
+                                 if (currentState.error != null) return;
+
+                                // 3. Clear the success flag so other screens don't react
+                                 ref.read(serviceRequestProvider.notifier).clearSuccess();
                                
                                 showDialog(
                                   context: context,

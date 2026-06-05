@@ -140,7 +140,7 @@ class _EditRequestScreenState extends ConsumerState<EditRequestScreen> {
                             .copyWith(color: AppColors.textPrimary)),
                     const SizedBox(height: 10),
                     DropdownButtonFormField<String>(
-                      value: _profession,
+                      initialValue: _profession,
                       decoration: InputDecoration(
                         filled: true,
                         fillColor: AppColors.inputFill,
