@@ -51,6 +51,8 @@ class ServiceRequestModel extends ServiceRequestEntity {
         photoBase64: m['photo_base64'] as String?,
       );
 
+  get isApplied => null;
+
   Map<String, dynamic> toDb() => {
     'id':          id,
     'title':       title,
